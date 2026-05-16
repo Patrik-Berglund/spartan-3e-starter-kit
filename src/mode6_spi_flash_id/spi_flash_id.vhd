@@ -87,15 +87,12 @@ begin
             spi_ss_b <= '0';
             clk_div <= clk_div + 1;
 
-            if clk_div = 3 then
-              -- Rising edge: sample MISO
-              sck_int <= '1';
+            if clk_div = 7 then
+              -- Falling edge: sample MISO (Flash outputs on falling edge)
+              sck_int <= '0';
               if bit_cnt < 24 then
                 shift_rx <= shift_rx(22 downto 0) & spi_miso;
               end if;
-            elsif clk_div = 7 then
-              -- Falling edge: shift out next bit
-              sck_int <= '0';
               shift_tx <= shift_tx(30 downto 0) & '0';
               if bit_cnt = 0 then
                 state <= S_DONE;
@@ -103,6 +100,9 @@ begin
                 bit_cnt <= bit_cnt - 1;
               end if;
               clk_div <= (others => '0');
+            elsif clk_div = 3 then
+              -- Rising edge
+              sck_int <= '1';
             end if;
 
           when S_DONE =>
