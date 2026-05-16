@@ -31,7 +31,7 @@ $(BUILDDIR)/$(DESIGN).ncd: $(BUILDDIR)/$(DESIGN)_map.ncd
 
 # Bitstream
 $(BUILDDIR)/$(DESIGN).bit: $(BUILDDIR)/$(DESIGN).ncd
-	cd $(BUILDDIR) && bitgen -w -g StartUpClk:JtagClk top.ncd top.bit top.pcf
+	cd $(BUILDDIR) && bitgen -w -g StartUpClk:JtagClk -g UnusedPin:PullNone top.ncd top.bit top.pcf
 
 # Program via xc3sprog (Xilinx Platform Cable USB II)
 program: $(BUILDDIR)/$(DESIGN).bit

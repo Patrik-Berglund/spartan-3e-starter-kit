@@ -23,9 +23,9 @@ entity spi_flash_id is
 end entity spi_flash_id;
 
 architecture rtl of spi_flash_id is
-  type state_t is (S_IDLE, S_WAKEUP, S_WAKE_CLOCK, S_WAKE_DONE, S_PAUSE, S_START, S_CLOCK, S_DONE);
+  type state_t is (S_IDLE, S_START, S_CLOCK, S_DONE);
   signal state    : state_t := S_IDLE;
-  signal bit_cnt  : integer range 0 to 2000 := 0;
+  signal bit_cnt  : integer range 0 to 31 := 0;
   signal clk_div  : unsigned(3 downto 0) := (others => '0');
   signal shift_tx : std_logic_vector(31 downto 0) := (others => '0');
   signal shift_rx : std_logic_vector(23 downto 0) := (others => '0');
@@ -73,50 +73,7 @@ begin
             spi_ss_b <= '1';
             sck_int <= '0';
             if read_ok = '0' then
-              state <= S_WAKEUP;
-            end if;
-
-          -- Release from Deep Power-down: send 0xAB
-          when S_WAKEUP =>
-            spi_ss_b <= '0';
-            sck_int <= '0';
-            shift_tx <= x"AB000000";
-            bit_cnt <= 7;  -- only need 8 bits for wakeup
-            clk_div <= (others => '0');
-            state <= S_WAKE_CLOCK;
-
-          when S_WAKE_CLOCK =>
-            spi_ss_b <= '0';
-            clk_div <= clk_div + 1;
-            if clk_div = 7 then
-              sck_int <= '1';
-            elsif clk_div = 15 then
-              sck_int <= '0';
-              shift_tx <= shift_tx(30 downto 0) & '0';
-              if bit_cnt = 0 then
-                state <= S_WAKE_DONE;
-              else
-                bit_cnt <= bit_cnt - 1;
-              end if;
-              clk_div <= (others => '0');
-            end if;
-
-          when S_WAKE_DONE =>
-            spi_ss_b <= '1';
-            sck_int <= '0';
-            clk_div <= (others => '0');
-            bit_cnt <= 0;
-            state <= S_PAUSE;
-
-          -- Wait tRES1 (30 us max) before RDID
-          when S_PAUSE =>
-            spi_ss_b <= '1';
-            sck_int <= '0';
-            if bit_cnt = 2000 then  -- 40 us @ 50 MHz
-              bit_cnt <= 0;
               state <= S_START;
-            else
-              bit_cnt <= bit_cnt + 1;
             end if;
 
           when S_START =>
@@ -156,6 +113,9 @@ begin
             id_data <= shift_rx;
             read_ok <= '1';
             state <= S_IDLE;
+
+          when others =>
+            state <= S_IDLE;
         end case;
       end if;
     end if;
@@ -167,11 +127,13 @@ begin
   -- Debug: show raw MISO and state on LEDs when in this mode
   -- LED0 = spi_miso, LED1 = spi_ss_b (should go low during transfer), LED7 = read_ok
   led(0) <= spi_miso;
-  led(1) <= '0';  -- CS is low during transfer
+  led(1) <= '0';
   led(2) <= sck_int;
   led(3) <= shift_tx(31);
+  led(4) <= id_data(0);  -- should be '1' if we got 0x15
+  led(5) <= id_data(4);  -- should be '1' if we got 0x15
+  led(6) <= id_data(8);  -- should be '0' if we got 0x20
   led(7) <= read_ok;
-  led(6 downto 4) <= (others => '0');
 
   -- LCD: "ID: XX XX XX    "
   lcd_line2 <=

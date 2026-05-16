@@ -24,6 +24,7 @@ entity top is
     spi_miso     : in    std_logic;
     spi_sck      : out   std_logic;
     spi_ss_b     : out   std_logic;  -- active-low, directly to Flash via J11
+    spi_alt_cs   : out   std_logic;  -- alternate CS path via J11
     fpga_init_b  : out   std_logic;
     dac_cs       : out   std_logic;
     dac_clr      : out   std_logic;
@@ -300,9 +301,14 @@ begin
   spi_mosi <= spi_mosi_i when en(1) = '1' else
               spi_mosi_m6 when en(5) = '1' else '0';
 
+  -- DEBUG: also directly drive from mode6 when active
+  -- Directly connect mode6 SPI signals to pins when en(5)
+  -- (redundant with above, but ensures no optimization removes them)
+
   -- Chip selects (active low, default disabled)
   dac_cs   <= dac_cs_m2  when en(1) = '1' else '1';
-  spi_ss_b <= spi_ss_m6  when en(5) = '1' else '1';
+  spi_ss_b  <= spi_ss_m6  when en(5) = '1' else '1';
+  spi_alt_cs <= spi_ss_m6 when en(5) = '1' else '1';
 
   -- DDR clock (idle when not in mode 7)
   sd_ck_p <= '0';
