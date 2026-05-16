@@ -59,9 +59,11 @@ Displays keystrokes from a PS/2 keyboard.
 
 ### 6: SPI Flash ID
 
+⚠️ **Not working** — needs logic analyzer to debug SPI bus timing.
+
 Reads the JEDEC ID from the on-board M25P16 SPI Flash.
 
-- **LCD** — shows "ID: 20 20 15" (STMicro, 16 Mbit)
+- **LCD** — should show "ID: 20 20 15" (STMicro, 16 Mbit)
 - Automatic — no user interaction needed
 
 ### 7: DDR Memory Test

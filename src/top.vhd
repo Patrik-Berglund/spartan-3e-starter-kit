@@ -95,7 +95,6 @@ architecture rtl of top is
   -- Per-mode LED outputs
   signal led_mode1   : std_logic_vector(7 downto 0);
   signal led_mode3   : std_logic_vector(7 downto 0);
-  signal led_mode6   : std_logic_vector(7 downto 0);
   signal led_mode7   : std_logic_vector(7 downto 0);
 
   -- SPI shared bus
@@ -238,8 +237,6 @@ begin
       clk => clk_50mhz, rst => rst, enable => en(5),
       spi_sck => spi_sck_m6, spi_mosi => spi_mosi_m6, spi_miso => spi_miso,
       spi_ss_b => spi_ss_m6,
-      dac_cs => open, amp_cs => open, ad_conv => open,
-      led => led_mode6,
       lcd_line2 => lcd2_mode6
     );
 
@@ -290,7 +287,6 @@ begin
   with active_mode select led <=
     led_mode1 when 0,
     led_mode3 when 2,
-    led_mode6 when 5,
     led_mode7 when 6,
     x"00"     when others;
 

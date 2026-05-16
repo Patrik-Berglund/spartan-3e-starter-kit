@@ -2,22 +2,18 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+-- SPI Flash JEDEC ID reader (M25P16).
+-- STATUS: Not working — needs logic analyzer to debug SPI timing.
+
 entity spi_flash_id is
   port (
     clk       : in  std_logic;
     rst       : in  std_logic;
     enable    : in  std_logic;
-    -- Direct SPI pins
     spi_sck   : out std_logic;
     spi_mosi  : out std_logic;
     spi_miso  : in  std_logic;
     spi_ss_b  : out std_logic;
-    -- Disable other SPI devices
-    dac_cs    : out std_logic;
-    amp_cs    : out std_logic;
-    ad_conv   : out std_logic;
-    -- Debug
-    led       : out std_logic_vector(7 downto 0);
     lcd_line2 : out std_logic_vector(127 downto 0)
   );
 end entity spi_flash_id;
@@ -50,54 +46,46 @@ architecture rtl of spi_flash_id is
   end function;
 begin
 
-  -- Disable other SPI devices
-  dac_cs  <= '1';
-  amp_cs  <= '1';
-  ad_conv <= '0';
-
   process(clk)
   begin
     if rising_edge(clk) then
       if rst = '1' then
-        state   <= S_IDLE;
+        state    <= S_IDLE;
         spi_ss_b <= '1';
-        sck_int <= '0';
-        read_ok <= '0';
+        sck_int  <= '0';
+        read_ok  <= '0';
       elsif enable = '0' then
-        state   <= S_IDLE;
+        state    <= S_IDLE;
         spi_ss_b <= '1';
-        sck_int <= '0';
+        sck_int  <= '0';
       else
         case state is
           when S_IDLE =>
             spi_ss_b <= '1';
-            sck_int <= '0';
+            sck_int  <= '0';
             if read_ok = '0' then
               state <= S_START;
             end if;
 
           when S_START =>
             spi_ss_b <= '0';
-            sck_int <= '0';
+            sck_int  <= '0';
             shift_tx <= x"9F000000";
             shift_rx <= (others => '0');
-            bit_cnt <= 31;
-            clk_div <= (others => '0');
-            state <= S_CLOCK;
+            bit_cnt  <= 31;
+            clk_div  <= (others => '0');
+            state    <= S_CLOCK;
 
           when S_CLOCK =>
             spi_ss_b <= '0';
-            clk_div <= clk_div + 1;
-
+            clk_div  <= clk_div + 1;
             if clk_div = 7 then
-              -- Rising edge: sample MISO
               sck_int <= '1';
               if bit_cnt < 24 then
                 shift_rx <= shift_rx(22 downto 0) & spi_miso;
               end if;
             elsif clk_div = 15 then
-              -- Falling edge: shift MOSI
-              sck_int <= '0';
+              sck_int  <= '0';
               shift_tx <= shift_tx(30 downto 0) & '0';
               if bit_cnt = 0 then
                 state <= S_DONE;
@@ -109,13 +97,10 @@ begin
 
           when S_DONE =>
             spi_ss_b <= '1';
-            sck_int <= '0';
-            id_data <= shift_rx;
-            read_ok <= '1';
-            state <= S_IDLE;
-
-          when others =>
-            state <= S_IDLE;
+            sck_int  <= '0';
+            id_data  <= shift_rx;
+            read_ok  <= '1';
+            state    <= S_IDLE;
         end case;
       end if;
     end if;
@@ -123,17 +108,6 @@ begin
 
   spi_sck  <= sck_int;
   spi_mosi <= shift_tx(31);
-
-  -- Debug: show raw MISO and state on LEDs when in this mode
-  -- LED0 = spi_miso, LED1 = spi_ss_b (should go low during transfer), LED7 = read_ok
-  led(0) <= spi_miso;
-  led(1) <= '0';
-  led(2) <= sck_int;
-  led(3) <= shift_tx(31);
-  led(4) <= id_data(0);  -- should be '1' if we got 0x15
-  led(5) <= id_data(4);  -- should be '1' if we got 0x15
-  led(6) <= id_data(8);  -- should be '0' if we got 0x20
-  led(7) <= read_ok;
 
   -- LCD: "ID: XX XX XX    "
   lcd_line2 <=
