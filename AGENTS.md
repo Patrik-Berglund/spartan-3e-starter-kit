@@ -6,15 +6,50 @@ LED blinker demo for the Xilinx Spartan-3E Starter Kit (XC3S500E-FG320-4).
 
 ## Toolchain
 
-- Xilinx ISE 14.7 (CLI tools: xst, ngdbuild, map, par, bitgen, impact)
+- Xilinx ISE 14.7 (CLI tools: xst, ngdbuild, map, par, bitgen)
 - Source environment: `source /opt/Xilinx/14.7/ISE_DS/settings64.sh`
-- Language: VHDL (VHDL-93, the ISE 14.7 default)
+- Programmer: `xc3sprog` (not iMPACT — it has libusb issues on WSL)
+- Language: VHDL-93 (the ISE 14.7 default — do NOT use `-vhdl2008`)
 - No GUI tools — CLI only
 
 ## Build
 
-Run `make` from the project root. The flow is:
-xst → ngdbuild → map → par → bitgen
+```bash
+source /opt/Xilinx/14.7/ISE_DS/settings64.sh
+make
+```
+
+Flow: xst → ngdbuild → map → par → bitgen
+
+## Program
+
+Use `xc3sprog` with the Xilinx Platform Cable USB II:
+
+```bash
+sudo xc3sprog -c xpc -p 0 build/top.bit
+```
+
+The USB cable must be attached to WSL first (see USB passthrough below).
+
+## USB Passthrough (WSL)
+
+From Admin PowerShell:
+
+```powershell
+usbipd bind --busid 7-3
+usbipd attach --wsl --busid 7-3
+```
+
+After firmware load the cable re-enumerates — re-attach is needed.
+Verify: `lsusb | grep Xilinx` (expect `03fd:0008 Platform Cable USB II`).
+
+If the cable shows `03fd:000d` (firmware not loaded), run:
+
+```bash
+sudo fxload -t fx2 -I /opt/Xilinx/14.7/ISE_DS/ISE/bin/lin64/xusbdfwu.hex -D /dev/bus/usb/<bus>/<dev>
+```
+
+Then re-attach from PowerShell (cable re-enumerates after firmware load).
 
 ## Target Hardware
 

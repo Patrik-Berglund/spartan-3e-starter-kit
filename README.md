@@ -5,6 +5,7 @@ LED blinker demo for the Xilinx Spartan-3E Starter Kit (XC3S500E-FG320-4).
 ## Requirements
 
 - Xilinx ISE 14.7 (WebPack edition, free license)
+- xc3sprog (JTAG programmer)
 - Linux / WSL
 
 ## Installing ISE 14.7 on WSL (Ubuntu 24.04)
@@ -40,6 +41,14 @@ sudo ./bin/lin64/batchxsetup --batch /path/to/ise_install.cfg
 
 See `ise_install.cfg` in this repo for the config used.
 
+## Installing xc3sprog
+
+```bash
+sudo apt install -y xc3sprog
+```
+
+iMPACT does not work reliably on WSL due to libusb/driver issues. Use xc3sprog instead.
+
 ## Setup
 
 Source the ISE environment before building:
@@ -57,11 +66,19 @@ make clean  # remove build artifacts
 
 ## USB passthrough (WSL)
 
-The board connects to Windows via USB. To make it visible in WSL, use `usbipd` from an **Admin PowerShell**:
+The board connects to Windows via USB. To make it visible in WSL, use `usbipd` from an **Admin PowerShell**.
+
+Find the Xilinx cable's bus ID:
 
 ```powershell
-usbipd bind --busid 7-3
-usbipd attach --wsl --busid 7-3
+usbipd list
+```
+
+Look for `03fd:0008` (firmware loaded) or `03fd:000d` (firmware not loaded). Then bind and attach:
+
+```powershell
+usbipd bind --busid <BUSID>
+usbipd attach --wsl --busid <BUSID>
 ```
 
 Verify in WSL:
@@ -72,12 +89,22 @@ lsusb | grep Xilinx
 
 Note: re-attach is needed after each reconnect or reboot.
 
+### Firmware loading
+
+If the cable shows `03fd:000d` (firmware not loaded) instead of `03fd:0008`, load the firmware manually:
+
+```bash
+sudo fxload -t fx2 -I /opt/Xilinx/14.7/ISE_DS/ISE/bin/lin64/xusbdfwu.hex -D /dev/bus/usb/<bus>/<dev>
+```
+
+The cable re-enumerates after firmware load — re-attach from PowerShell before continuing.
+
 ## Program the board
 
 Connect the board via USB-JTAG (see above), then:
 
 ```bash
-make program
+sudo xc3sprog -c xpc -p 0 build/top.bit
 ```
 
 ## Design

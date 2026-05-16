@@ -1,6 +1,8 @@
 # ISE build artifacts
 build/xst/
 build/_ngo/
+build/_xmsgs/
+build/xlnx_auto_0_xdb/
 build/*.ngc
 build/*.ngd
 build/*.ncd
@@ -21,6 +23,19 @@ build/*.twx
 build/*.xwbt
 build/*.lst
 build/*.srp
+build/*.lso
+build/*.ngr
+build/*.ptwx
+build/*.xrpt
+build/*_pad.csv
+build/*_pad.txt
+build/*_summary.xml
+build/*_usage.xml
+build/usage_statistics_webtalk.html
+build/webtalk.log
+
+# iMPACT logs
+_impactbatch.log
 
 # Xilinx license (do not commit)
 *.lic

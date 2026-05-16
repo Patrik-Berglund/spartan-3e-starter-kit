@@ -15,4 +15,4 @@ run
 -hierarchy_separator /
 -bus_delimiter <>
 -case Maintain
--vhdl2008 No
+

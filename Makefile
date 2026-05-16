@@ -31,9 +31,9 @@ $(BUILDDIR)/$(DESIGN).ncd: $(BUILDDIR)/$(DESIGN)_map.ncd
 $(BUILDDIR)/$(DESIGN).bit: $(BUILDDIR)/$(DESIGN).ncd
 	cd $(BUILDDIR) && bitgen -w -g StartUpClk:JtagClk top.ncd top.bit top.pcf
 
-# Program via iMPACT (batch mode)
+# Program via xc3sprog (Xilinx Platform Cable USB II)
 program: $(BUILDDIR)/$(DESIGN).bit
-	impact -batch impact_program.cmd
+	sudo xc3sprog -c xpc -p 0 $<
 
 clean:
 	rm -rf $(BUILDDIR)/xst $(BUILDDIR)/_ngo
