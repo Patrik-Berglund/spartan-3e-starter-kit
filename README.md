@@ -4,6 +4,33 @@
 
 LED blinker demo for the Xilinx Spartan-3E Starter Kit (XC3S500E-FG320-4).
 
+## Board Specifications
+
+| Feature | Details |
+|---------|---------|
+| FPGA | Xilinx XC3S500E (10,000 logic cells, 320-pin FBGA) |
+| Clock | 50 MHz on-board oscillator + aux DIP socket + SMA input |
+| DDR SDRAM | 64 MB (512 Mbit), Micron MT46V32M16, x16, 100+ MHz |
+| Parallel NOR Flash | 16 MB (128 Mbit), Intel StrataFlash |
+| SPI Serial Flash | 2 MB (16 Mbit), STMicro M25P16 |
+| Platform Flash | 4 Mbit Xilinx XCF04S (FPGA config storage) |
+| CPLD | Xilinx XC2C64A CoolRunner-II (64 macrocells) |
+| Character LCD | 2×16 characters, 4-bit interface |
+| VGA | DB15, 3-bit color (8 colors), 640×480 @ 60 Hz |
+| RS-232 | 2 ports — DCE (female DB9) + DTE (male DB9) |
+| PS/2 | Mouse/keyboard port (6-pin mini-DIN) |
+| Ethernet | 10/100 PHY (SMSC LAN83C185) + RJ-45 |
+| DAC | 4-channel, 12-bit, SPI (Linear Tech LTC2624) |
+| ADC | 2-channel, 14-bit simultaneous, SPI (Linear Tech LTC1407A-1) |
+| Pre-Amplifier | Dual programmable gain (LTC6912-1), gains -1 to -100 |
+| LEDs | 8 discrete, active-high |
+| Slide Switches | 4 |
+| Push Buttons | 4 (N/E/S/W) |
+| Rotary Encoder | Shaft encoder + push button |
+| Expansion | Hirose FX2 100-pin (43 I/O) + three 6-pin headers |
+| 1-Wire EEPROM | Maxim DS2432 SHA-1 (bitstream copy protection) |
+| USB-JTAG | On-board programming/debug (Type B connector) |
+
 ## Requirements
 
 - Xilinx ISE 14.7 (WebPack edition, free license)
