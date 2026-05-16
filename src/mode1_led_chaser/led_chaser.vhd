@@ -105,14 +105,22 @@ begin
                   direction <= '1';
                 end if;
               end if;
-            when "001" =>  -- all LEDs blink alternating
-              pattern <= not pattern;
+            when "001" =>  -- alternating LEDs
+              if pattern = "10101010" then
+                pattern <= "01010101";
+              else
+                pattern <= "10101010";
+              end if;
             when "010" =>  -- rotate left
               pattern <= pattern(6 downto 0) & pattern(7);
             when "011" =>  -- rotate right
               pattern <= pattern(0) & pattern(7 downto 1);
-            when "100" =>  -- fill left
-              pattern <= pattern(6 downto 0) & '1';
+            when "100" =>  -- fill then reset
+              if pattern = "11111111" then
+                pattern <= "00000000";
+              else
+                pattern <= pattern(6 downto 0) & '1';
+              end if;
             when others =>  -- blink all
               pattern <= not pattern;
           end case;
