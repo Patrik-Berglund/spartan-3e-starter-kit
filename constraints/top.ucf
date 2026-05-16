@@ -1,0 +1,15 @@
+# Spartan-3E Starter Kit (XC3S500E-FG320)
+# Clock - 50 MHz oscillator
+NET "clk" LOC = "C9" | IOSTANDARD = LVCMOS33;
+NET "clk" TNM_NET = "clk";
+TIMESPEC "TS_clk" = PERIOD "clk" 20 ns HIGH 50%;
+
+# LEDs (accent accent accent accent)
+NET "led<0>" LOC = "F12" | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "led<1>" LOC = "E12" | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "led<2>" LOC = "E11" | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "led<3>" LOC = "F11" | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "led<4>" LOC = "C11" | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "led<5>" LOC = "D11" | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "led<6>" LOC = "E9"  | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;
+NET "led<7>" LOC = "F9"  | IOSTANDARD = LVCMOS33 | SLEW = SLOW | DRIVE = 8;

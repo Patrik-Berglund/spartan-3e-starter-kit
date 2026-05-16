@@ -1,0 +1,26 @@
+# ISE build artifacts
+build/xst/
+build/_ngo/
+build/*.ngc
+build/*.ngd
+build/*.ncd
+build/*.pcf
+build/*.bit
+build/*.bgn
+build/*.bld
+build/*.drc
+build/*.map
+build/*.mrp
+build/*.ngm
+build/*.syr
+build/*.par
+build/*.pad
+build/*.xpi
+build/*.unroutes
+build/*.twx
+build/*.xwbt
+build/*.lst
+build/*.srp
+
+# Xilinx license (do not commit)
+*.lic
