@@ -121,8 +121,12 @@ begin
               else
                 pattern <= pattern(6 downto 0) & '1';
               end if;
-            when others =>  -- blink all
-              pattern <= not pattern;
+            when others =>  -- blink all on/off
+              if pattern = "00000000" then
+                pattern <= "11111111";
+              else
+                pattern <= "00000000";
+              end if;
           end case;
         end if;
       end if;
