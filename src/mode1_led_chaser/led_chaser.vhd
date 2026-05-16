@@ -44,19 +44,33 @@ begin
     end if;
   end process;
 
-  -- Prescaler
+  -- Prescaler: free-running counter, speed selects threshold
   process(clk)
+    variable threshold : unsigned(24 downto 0);
   begin
     if rising_edge(clk) then
-      tick <= '0';
       if rst = '1' or enable = '0' then
         prescale <= (others => '0');
+        tick <= '0';
       else
-        if prescale = unsigned(shift_left(to_unsigned(1, 25), to_integer(speed) + 16)) then
+        tick <= '0';
+        prescale <= prescale + 1;
+        -- Speed 0 = slowest (~1.5 Hz), speed 8+ = fastest (~380 Hz)
+        threshold := (others => '0');
+        case speed is
+          when "0000" => threshold := to_unsigned(25000000, 25); -- 1 Hz
+          when "0001" => threshold := to_unsigned(12500000, 25);
+          when "0010" => threshold := to_unsigned(6250000, 25);
+          when "0011" => threshold := to_unsigned(3125000, 25);
+          when "0100" => threshold := to_unsigned(1562500, 25);
+          when "0101" => threshold := to_unsigned(781250, 25);
+          when "0110" => threshold := to_unsigned(390625, 25);
+          when "0111" => threshold := to_unsigned(195312, 25);
+          when others => threshold := to_unsigned(97656, 25);
+        end case;
+        if prescale >= threshold then
           prescale <= (others => '0');
           tick <= '1';
-        else
-          prescale <= prescale + 1;
         end if;
       end if;
     end if;
