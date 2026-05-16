@@ -78,21 +78,21 @@ begin
 
   -- Pattern shift
   process(clk)
-    variable sw_prev : std_logic_vector(3 downto 1) := "000";
+    variable sw_prev : std_logic_vector(3 downto 0) := "0000";
   begin
     if rising_edge(clk) then
       if rst = '1' or enable = '0' then
         pattern <= "00000001";
         direction <= '1';
-        sw_prev := "000";
+        sw_prev := "0000";
       else
         -- Reset pattern when switches change
-        if sw(3 downto 1) /= sw_prev then
+        if sw(3 downto 0) /= sw_prev then
           pattern <= "00000001";
           direction <= '1';
-          sw_prev := sw(3 downto 1);
+          sw_prev := sw(3 downto 0);
         elsif tick = '1' then
-          case sw(3 downto 1) is
+          case sw(2 downto 0) is
             when "000" =>  -- single LED bounce
               if direction = '1' then
                 pattern <= pattern(6 downto 0) & '0';
@@ -143,7 +143,7 @@ begin
     if speed > 9 then
       s_val := to_unsigned(55 + to_integer(speed), 8);  -- A-F
     end if;
-    p_val := to_unsigned(48 + to_integer(unsigned(sw(3 downto 1))), 8);
+    p_val := to_unsigned(48 + to_integer(unsigned(sw(2 downto 0))), 8);
     lcd_line2 <=
       char_to_slv('S') & char_to_slv('p') & char_to_slv('d') & char_to_slv(':') &
       std_logic_vector(s_val) & char_to_slv(' ') &

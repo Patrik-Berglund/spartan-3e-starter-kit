@@ -11,8 +11,7 @@ The LCD shows the current mode name on line 1 and mode-specific status on line 2
 Animated patterns on the 8 LEDs.
 
 - **Rotate** — adjust speed (0=slow, F=fast)
-- **SW(3:1)** — select pattern (0=bounce, 1=knight rider, 2=rotate left, 3=rotate right, 4=fill, 5+=blink)
-- **SW(0)** — direction
+- **SW(2:0)** — select pattern (0=bounce, 1=alternating, 2=rotate left, 3=rotate right, 4=fill, 5+=blink all)
 
 ### 2: DAC Waveform
 
