@@ -97,31 +97,32 @@ architecture rtl of top is
   signal led_mode3   : std_logic_vector(7 downto 0);
   signal led_mode7   : std_logic_vector(7 downto 0);
 
-  -- SPI shared bus
-  signal spi_start_m2 : std_logic;
-  signal spi_tx_m2    : std_logic_vector(31 downto 0);
-  signal spi_rx       : std_logic_vector(31 downto 0);
+  -- Shared SPI bus
+  signal spi_tx_mux   : std_logic_vector(31 downto 0);
+  signal spi_rx_i     : std_logic_vector(31 downto 0);
+  signal spi_bits_mux : unsigned(5 downto 0);
+  signal spi_start_mux: std_logic;
   signal spi_busy_i   : std_logic;
   signal spi_done_i   : std_logic;
   signal spi_sck_i    : std_logic;
   signal spi_mosi_i   : std_logic;
+  signal cs_sel_mux   : unsigned(2 downto 0);
 
-  -- Mode 6 direct SPI
-  signal spi_sck_m6   : std_logic;
-  signal spi_mosi_m6  : std_logic;
+  -- Per-mode SPI signals
+  signal spi_tx_m2    : std_logic_vector(31 downto 0);
+  signal spi_bits_m2  : unsigned(5 downto 0);
+  signal spi_start_m2 : std_logic;
+  signal cs_sel_m2    : unsigned(2 downto 0);
 
-  -- ADC dedicated SPI
-  signal adc_sck      : std_logic;
+  signal spi_tx_m3    : std_logic_vector(31 downto 0);
+  signal spi_bits_m3  : unsigned(5 downto 0);
+  signal spi_start_m3 : std_logic;
+  signal cs_sel_m3    : unsigned(2 downto 0);
 
-  -- DAC CS from mode2
-  signal dac_cs_m2    : std_logic;
-  -- SPI Flash CS from mode6
-  signal spi_ss_m6    : std_logic;
-
-  -- SPI mux signals
-  signal spi_tx_mux   : std_logic_vector(31 downto 0);
-  signal spi_start_mux: std_logic;
-
+  signal spi_tx_m6    : std_logic_vector(31 downto 0);
+  signal spi_bits_m6  : unsigned(5 downto 0);
+  signal spi_start_m6 : std_logic;
+  signal cs_sel_m6    : unsigned(2 downto 0);
   -- LCD refresh timer
   signal lcd_timer    : unsigned(21 downto 0) := (others => '0');
 
@@ -176,20 +177,41 @@ begin
       lcd_e => lcd_e, lcd_rs => lcd_rs, lcd_rw => lcd_rw, lcd_db => lcd_db
     );
 
-  -- SPI data/start mux
-  spi_tx_mux    <= spi_tx_m2;
-  spi_start_mux <= spi_start_m2;
+  -- SPI bus mux: active mode owns the bus
+  spi_tx_mux    <= spi_tx_m2 when en(1) = '1' else
+                   spi_tx_m3 when en(2) = '1' else
+                   spi_tx_m6 when en(5) = '1' else (others => '0');
+  spi_bits_mux  <= spi_bits_m2 when en(1) = '1' else
+                   spi_bits_m3 when en(2) = '1' else
+                   spi_bits_m6 when en(5) = '1' else "000000";
+  spi_start_mux <= spi_start_m2 when en(1) = '1' else
+                   spi_start_m3 when en(2) = '1' else
+                   spi_start_m6 when en(5) = '1' else '0';
+  cs_sel_mux    <= cs_sel_m2 when en(1) = '1' else
+                   cs_sel_m3 when en(2) = '1' else
+                   cs_sel_m6 when en(5) = '1' else "000";
 
   u_spi: entity work.spi_master
-    generic map (G_DATA_WIDTH => 32, G_CPOL => '0', G_CPHA => '0', G_CLK_DIV => 4)
+    generic map (G_CLK_DIV => 8)
     port map (
       clk => clk_50mhz, rst => rst,
-      tx_data => spi_tx_mux,
-      rx_data => spi_rx,
+      tx_data => spi_tx_mux, rx_data => spi_rx_i,
+      num_bits => spi_bits_mux,
       start => spi_start_mux,
       busy => spi_busy_i, done => spi_done_i,
       spi_sck => spi_sck_i, spi_mosi => spi_mosi_i, spi_miso => spi_miso
     );
+
+  -- SPI pin drivers
+  spi_sck  <= spi_sck_i;
+  spi_mosi <= spi_mosi_i;
+
+  -- CS decoding from cs_sel_mux: 0=none, 1=DAC, 2=AMP, 3=Flash, 4=ADC
+  dac_cs     <= '0' when cs_sel_mux = "001" else '1';
+  amp_cs     <= '0' when cs_sel_mux = "010" else '1';
+  spi_ss_b   <= '0' when cs_sel_mux = "011" else '1';
+  spi_alt_cs <= '0' when cs_sel_mux = "011" else '1';
+  ad_conv    <= '1' when cs_sel_mux = "100" else '0';
 
   -- ==================== Mode Instances ====================
 
@@ -206,15 +228,17 @@ begin
       clk => clk_50mhz, rst => rst, enable => en(1),
       rot_event => rot_event, rot_dir => rot_dir,
       spi_start => spi_start_m2, spi_tx => spi_tx_m2,
-      spi_busy => spi_busy_i, dac_cs => dac_cs_m2,
-      lcd_line2 => lcd2_mode2
+      spi_bits => spi_bits_m2, spi_busy => spi_busy_i,
+      cs_sel => cs_sel_m2, lcd_line2 => lcd2_mode2
     );
 
   u_mode3: entity work.adc_voltmeter
     port map (
       clk => clk_50mhz, rst => rst, enable => en(2),
-      spi_sck => adc_sck, spi_miso => spi_miso,
-      ad_conv => ad_conv, amp_cs => amp_cs,
+      spi_tx => spi_tx_m3, spi_rx => spi_rx_i,
+      spi_bits => spi_bits_m3, spi_start => spi_start_m3,
+      spi_done => spi_done_i, spi_busy => spi_busy_i,
+      cs_sel => cs_sel_m3,
       led => led_mode3, lcd_line2 => lcd2_mode3
     );
 
@@ -235,9 +259,10 @@ begin
   u_mode6: entity work.spi_flash_id
     port map (
       clk => clk_50mhz, rst => rst, enable => en(5),
-      spi_sck => spi_sck_m6, spi_mosi => spi_mosi_m6, spi_miso => spi_miso,
-      spi_ss_b => spi_ss_m6,
-      lcd_line2 => lcd2_mode6
+      spi_tx => spi_tx_m6, spi_rx => spi_rx_i,
+      spi_bits => spi_bits_m6, spi_start => spi_start_m6,
+      spi_done => spi_done_i, spi_busy => spi_busy_i,
+      cs_sel => cs_sel_m6, lcd_line2 => lcd2_mode6
     );
 
   u_mode7: entity work.ddr_memtest
@@ -289,22 +314,6 @@ begin
     led_mode3 when 2,
     led_mode7 when 6,
     x"00"     when others;
-
-  -- SPI bus muxing
-  spi_sck  <= spi_sck_i  when en(1) = '1' else
-              spi_sck_m6 when en(5) = '1' else
-              adc_sck    when en(2) = '1' else '0';
-  spi_mosi <= spi_mosi_i when en(1) = '1' else
-              spi_mosi_m6 when en(5) = '1' else '0';
-
-  -- DEBUG: also directly drive from mode6 when active
-  -- Directly connect mode6 SPI signals to pins when en(5)
-  -- (redundant with above, but ensures no optimization removes them)
-
-  -- Chip selects (active low, default disabled)
-  dac_cs   <= dac_cs_m2  when en(1) = '1' else '1';
-  spi_ss_b  <= spi_ss_m6  when en(5) = '1' else '1';
-  spi_alt_cs <= spi_ss_m6 when en(5) = '1' else '1';
 
   -- DDR clock (idle when not in mode 7)
   sd_ck_p <= '0';

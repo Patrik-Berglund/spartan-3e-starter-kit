@@ -9,11 +9,12 @@ entity dac_waveform is
     enable    : in  std_logic;
     rot_event : in  std_logic;
     rot_dir   : in  std_logic;
-    -- SPI interface (directly drives bus when enabled)
+    -- Shared SPI bus interface
     spi_start : out std_logic;
     spi_tx    : out std_logic_vector(31 downto 0);
+    spi_bits  : out unsigned(5 downto 0);
     spi_busy  : in  std_logic;
-    dac_cs    : out std_logic;
+    cs_sel    : out unsigned(2 downto 0);
     lcd_line2 : out std_logic_vector(127 downto 0)
   );
 end entity dac_waveform;
@@ -112,18 +113,18 @@ begin
   end process;
 
   -- SPI DAC command: write and update channel A
-  -- Format: [8 don't care][4 cmd=0011][4 addr=0000][12 data][4 don't care]
   process(clk)
   begin
     if rising_edge(clk) then
       spi_start <= '0';
-      dac_cs    <= '1';
+      cs_sel    <= "000";
       if enable = '1' and send_tick = '1' and spi_busy = '0' then
         spi_tx <= x"00" & "0011" & "0000" & std_logic_vector(dac_val) & "0000";
+        spi_bits <= to_unsigned(32, 6);
+        cs_sel    <= "001";  -- DAC
         spi_start <= '1';
-        dac_cs    <= '0';
       elsif enable = '1' and spi_busy = '1' then
-        dac_cs <= '0';
+        cs_sel <= "001";
       end if;
     end if;
   end process;
