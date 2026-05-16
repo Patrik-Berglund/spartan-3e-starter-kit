@@ -84,26 +84,19 @@ begin
         pattern <= "00000001";
         direction <= '1';
       else
-        -- Direction from SW(0)
-        direction <= sw(0);
-
         if tick = '1' then
           case sw(3 downto 1) is
-            when "000" =>  -- single LED bounce
+            when "000" | "001" =>  -- bounce / knight rider
               if direction = '1' then
                 pattern <= pattern(6 downto 0) & '0';
-                if pattern(6) = '1' then direction <= '0'; end if;
+                if pattern(6) = '1' then
+                  direction <= '0';
+                end if;
               else
                 pattern <= '0' & pattern(7 downto 1);
-                if pattern(1) = '1' then direction <= '1'; end if;
-              end if;
-            when "001" =>  -- knight rider
-              if direction = '1' then
-                pattern <= pattern(6 downto 0) & '0';
-                if pattern(6) = '1' then direction <= '0'; end if;
-              else
-                pattern <= '0' & pattern(7 downto 1);
-                if pattern(1) = '1' then direction <= '1'; end if;
+                if pattern(1) = '1' then
+                  direction <= '1';
+                end if;
               end if;
             when "010" =>  -- rotate left
               pattern <= pattern(6 downto 0) & pattern(7);
