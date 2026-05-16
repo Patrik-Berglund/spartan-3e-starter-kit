@@ -52,7 +52,7 @@ begin
         -- Detect rotation on rising edge of A
         if a_deb(0) = '1' and a_prev = '0' then
           rot_event <= '1';
-          rot_dir   <= b_deb(0);  -- B low on A rise = CW
+          rot_dir   <= not b_deb(0);  -- B high on A rise = CW
         end if;
         a_prev <= a_deb(0);
 
