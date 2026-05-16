@@ -97,13 +97,15 @@ architecture rtl of top is
   -- SPI shared bus
   signal spi_start_m2 : std_logic;
   signal spi_tx_m2    : std_logic_vector(31 downto 0);
-  signal spi_start_m6 : std_logic;
-  signal spi_tx_m6    : std_logic_vector(31 downto 0);
   signal spi_rx       : std_logic_vector(31 downto 0);
   signal spi_busy_i   : std_logic;
   signal spi_done_i   : std_logic;
   signal spi_sck_i    : std_logic;
   signal spi_mosi_i   : std_logic;
+
+  -- Mode 6 direct SPI
+  signal spi_sck_m6   : std_logic;
+  signal spi_mosi_m6  : std_logic;
 
   -- ADC dedicated SPI
   signal adc_sck      : std_logic;
@@ -170,8 +172,8 @@ begin
     );
 
   -- SPI data/start mux
-  spi_tx_mux    <= spi_tx_m2 when en(1) = '1' else spi_tx_m6;
-  spi_start_mux <= spi_start_m2 or spi_start_m6;
+  spi_tx_mux    <= spi_tx_m2;
+  spi_start_mux <= spi_start_m2;
 
   u_spi: entity work.spi_master
     generic map (G_DATA_WIDTH => 32, G_CPOL => '0', G_CPHA => '0', G_CLK_DIV => 4)
@@ -228,9 +230,10 @@ begin
   u_mode6: entity work.spi_flash_id
     port map (
       clk => clk_50mhz, rst => rst, enable => en(5),
-      spi_start => spi_start_m6, spi_tx => spi_tx_m6,
-      spi_rx => spi_rx, spi_busy => spi_busy_i, spi_done => spi_done_i,
-      spi_ss_b => spi_ss_m6, lcd_line2 => lcd2_mode6
+      spi_sck => spi_sck_m6, spi_mosi => spi_mosi_m6, spi_miso => spi_miso,
+      spi_ss_b => spi_ss_m6,
+      dac_cs => open, amp_cs => open, ad_conv => open,
+      lcd_line2 => lcd2_mode6
     );
 
   u_mode7: entity work.ddr_memtest
@@ -284,9 +287,11 @@ begin
     x"00"     when others;
 
   -- SPI bus muxing
-  spi_sck  <= spi_sck_i when (en(1) = '1' or en(5) = '1') else
+  spi_sck  <= spi_sck_i  when en(1) = '1' else
+              spi_sck_m6 when en(5) = '1' else
               adc_sck    when en(2) = '1' else '0';
-  spi_mosi <= spi_mosi_i;
+  spi_mosi <= spi_mosi_i when en(1) = '1' else
+              spi_mosi_m6 when en(5) = '1' else '0';
 
   -- Chip selects (active low, default disabled)
   dac_cs   <= dac_cs_m2  when en(1) = '1' else '1';
