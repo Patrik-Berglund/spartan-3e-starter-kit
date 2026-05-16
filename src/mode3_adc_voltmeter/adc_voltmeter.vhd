@@ -23,7 +23,7 @@ entity adc_voltmeter is
 end entity adc_voltmeter;
 
 architecture rtl of adc_voltmeter is
-  type state_t is (S_INIT_AMP, S_WAIT_AMP, S_IDLE, S_CONV, S_WAIT_ADC, S_DISPLAY);
+  type state_t is (S_INIT_AMP, S_WAIT_AMP, S_IDLE, S_CONV, S_READ, S_WAIT_ADC, S_DISPLAY);
   signal state     : state_t := S_INIT_AMP;
   signal prescale  : unsigned(15 downto 0) := (others => '0');
   signal adc_data  : signed(13 downto 0) := (others => '0');
@@ -89,21 +89,25 @@ begin
               prescale <= prescale + 1;
             end if;
 
-          -- Start ADC conversion + read
+          -- Start ADC conversion: pulse AD_CONV then clock data
           when S_CONV =>
+            cs_sel <= "100";  -- AD_CONV high for one cycle
+            state  <= S_READ;
+
+          when S_READ =>
+            cs_sel <= "000";  -- AD_CONV low, now clock data
             if spi_busy = '0' then
-              spi_tx   <= (others => '0');  -- dummy data
-              spi_bits <= to_unsigned(32, 6);  -- 32 clocks (captures ch0 in bits 29:16)
-              cs_sel   <= "100";  -- ADC (AD_CONV)
+              spi_tx   <= (others => '0');
+              spi_bits <= to_unsigned(32, 6);
+              cs_sel   <= "000";
               spi_start <= '1';
               state    <= S_WAIT_ADC;
             end if;
 
           when S_WAIT_ADC =>
-            cs_sel <= "100";
+            cs_sel <= "000";
             if spi_done = '1' then
-              cs_sel <= "000";
-              state  <= S_DISPLAY;
+              state <= S_DISPLAY;
             end if;
 
           when S_DISPLAY =>
