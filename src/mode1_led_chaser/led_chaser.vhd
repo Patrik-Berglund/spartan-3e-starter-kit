@@ -7,9 +7,12 @@ entity led_chaser is
     clk       : in  std_logic;
     rst       : in  std_logic;
     enable    : in  std_logic;
-    sw        : in  std_logic_vector(3 downto 0);
     rot_event : in  std_logic;
     rot_dir   : in  std_logic;
+    rot_press : in  std_logic;
+    btn_north : in  std_logic;
+    btn_east  : in  std_logic;
+    btn_west  : in  std_logic;
     led       : out std_logic_vector(7 downto 0);
     lcd_line2 : out std_logic_vector(127 downto 0)
   );
@@ -20,7 +23,8 @@ architecture rtl of led_chaser is
   signal speed     : unsigned(3 downto 0) := "0100";
   signal pattern   : std_logic_vector(7 downto 0) := "00000001";
   signal tick      : std_logic := '0';
-  signal direction : std_logic := '1';  -- 1=left, 0=right
+  signal direction : std_logic := '1';
+  signal pat_sel   : unsigned(2 downto 0) := "000";
 
   function char_to_slv(c : character) return std_logic_vector is
   begin
@@ -44,7 +48,27 @@ begin
     end if;
   end process;
 
-  -- Prescaler: free-running counter, speed selects threshold
+  -- Pattern select via buttons
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      if rst = '1' then
+        pat_sel <= "000";
+      elsif enable = '1' then
+        if btn_east = '1' then
+          if pat_sel < 5 then
+            pat_sel <= pat_sel + 1;
+          end if;
+        elsif btn_west = '1' then
+          if pat_sel > 0 then
+            pat_sel <= pat_sel - 1;
+          end if;
+        end if;
+      end if;
+    end if;
+  end process;
+
+  -- Prescaler
   process(clk)
     variable threshold : unsigned(24 downto 0);
   begin
@@ -55,10 +79,8 @@ begin
       else
         tick <= '0';
         prescale <= prescale + 1;
-        -- Speed 0 = slowest (~1.5 Hz), speed 8+ = fastest (~380 Hz)
-        threshold := (others => '0');
         case speed is
-          when "0000" => threshold := to_unsigned(25000000, 25); -- 1 Hz
+          when "0000" => threshold := to_unsigned(25000000, 25);
           when "0001" => threshold := to_unsigned(12500000, 25);
           when "0010" => threshold := to_unsigned(6250000, 25);
           when "0011" => threshold := to_unsigned(3125000, 25);
@@ -78,57 +100,48 @@ begin
 
   -- Pattern shift
   process(clk)
-    variable sw_prev : std_logic_vector(3 downto 0) := "0000";
   begin
     if rising_edge(clk) then
       if rst = '1' or enable = '0' then
         pattern <= "00000001";
         direction <= '1';
-        sw_prev := "0000";
-      else
-        -- Reset pattern when switches change
-        if sw(3 downto 0) /= sw_prev then
-          pattern <= "00000001";
-          direction <= '1';
-          sw_prev := sw(3 downto 0);
-        elsif tick = '1' then
-          case sw(2 downto 0) is
-            when "000" =>  -- single LED bounce
-              if direction = '1' then
-                pattern <= pattern(6 downto 0) & '0';
-                if pattern(6) = '1' then
-                  direction <= '0';
-                end if;
-              else
-                pattern <= '0' & pattern(7 downto 1);
-                if pattern(1) = '1' then
-                  direction <= '1';
-                end if;
+      elsif tick = '1' then
+        case pat_sel is
+          when "000" =>  -- single LED bounce
+            if direction = '1' then
+              pattern <= pattern(6 downto 0) & '0';
+              if pattern(6) = '1' then
+                direction <= '0';
               end if;
-            when "001" =>  -- alternating LEDs
-              if pattern = "10101010" then
-                pattern <= "01010101";
-              else
-                pattern <= "10101010";
+            else
+              pattern <= '0' & pattern(7 downto 1);
+              if pattern(1) = '1' then
+                direction <= '1';
               end if;
-            when "010" =>  -- rotate left
-              pattern <= pattern(6 downto 0) & pattern(7);
-            when "011" =>  -- rotate right
-              pattern <= pattern(0) & pattern(7 downto 1);
-            when "100" =>  -- fill then reset
-              if pattern = "11111111" then
-                pattern <= "00000000";
-              else
-                pattern <= pattern(6 downto 0) & '1';
-              end if;
-            when others =>  -- blink all on/off
-              if pattern = "00000000" then
-                pattern <= "11111111";
-              else
-                pattern <= "00000000";
-              end if;
-          end case;
-        end if;
+            end if;
+          when "001" =>  -- alternating
+            if pattern = "10101010" then
+              pattern <= "01010101";
+            else
+              pattern <= "10101010";
+            end if;
+          when "010" =>  -- rotate left
+            pattern <= pattern(6 downto 0) & pattern(7);
+          when "011" =>  -- rotate right
+            pattern <= pattern(0) & pattern(7 downto 1);
+          when "100" =>  -- fill then reset
+            if pattern = "11111111" then
+              pattern <= "00000000";
+            else
+              pattern <= pattern(6 downto 0) & '1';
+            end if;
+          when others =>  -- blink all on/off
+            if pattern = "00000000" then
+              pattern <= "11111111";
+            else
+              pattern <= "00000000";
+            end if;
+        end case;
       end if;
     end if;
   end process;
@@ -136,14 +149,14 @@ begin
   led <= pattern when enable = '1' else (others => '0');
 
   -- LCD line 2: "Spd:X  Pat:X    "
-  process(speed, sw)
+  process(speed, pat_sel)
     variable s_val, p_val : unsigned(7 downto 0);
   begin
     s_val := to_unsigned(48 + to_integer(speed), 8);
     if speed > 9 then
-      s_val := to_unsigned(55 + to_integer(speed), 8);  -- A-F
+      s_val := to_unsigned(55 + to_integer(speed), 8);
     end if;
-    p_val := to_unsigned(48 + to_integer(unsigned(sw(2 downto 0))), 8);
+    p_val := to_unsigned(48 + to_integer(pat_sel), 8);
     lcd_line2 <=
       char_to_slv('S') & char_to_slv('p') & char_to_slv('d') & char_to_slv(':') &
       std_logic_vector(s_val) & char_to_slv(' ') &

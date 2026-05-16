@@ -13,6 +13,9 @@ NET "sw<3>" LOC = "N17" | IOSTANDARD = LVTTL | PULLUP ;
 
 # ==== Push Buttons ====
 NET "btn_south" LOC = "K17" | IOSTANDARD = LVTTL | PULLDOWN ;
+NET "btn_north" LOC = "V4"  | IOSTANDARD = LVTTL | PULLDOWN ;
+NET "btn_east"  LOC = "H13" | IOSTANDARD = LVTTL | PULLDOWN ;
+NET "btn_west"  LOC = "D18" | IOSTANDARD = LVTTL | PULLDOWN ;
 
 # ==== Rotary Encoder ====
 NET "rot_a"      LOC = "K18" | IOSTANDARD = LVTTL | PULLUP ;

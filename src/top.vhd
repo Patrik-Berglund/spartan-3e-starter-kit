@@ -7,6 +7,9 @@ entity top is
     clk_50mhz    : in    std_logic;
     sw           : in    std_logic_vector(3 downto 0);
     btn_south    : in    std_logic;
+    btn_north    : in    std_logic;
+    btn_east     : in    std_logic;
+    btn_west     : in    std_logic;
     rot_a        : in    std_logic;
     rot_b        : in    std_logic;
     rot_center   : in    std_logic;
@@ -143,7 +146,7 @@ begin
   u_mode_mux: entity work.mode_mux
     port map (
       clk => clk_50mhz, rst => rst,
-      rot_press => rot_press,
+      sw => sw,
       active_mode => active_mode,
       mode_name => mode_name
     );
@@ -176,7 +179,8 @@ begin
   u_mode1: entity work.led_chaser
     port map (
       clk => clk_50mhz, rst => rst, enable => en(0),
-      sw => sw, rot_event => rot_event, rot_dir => rot_dir,
+      rot_event => rot_event, rot_dir => rot_dir, rot_press => rot_press,
+      btn_north => btn_north, btn_east => btn_east, btn_west => btn_west,
       led => led_mode1, lcd_line2 => lcd2_mode1
     );
 

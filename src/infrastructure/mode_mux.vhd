@@ -2,8 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
--- Mode mux: counts ROT_CENTER presses modulo NUM_MODES.
--- Outputs active_mode index and mode name for LCD line 1.
+-- Mode mux: SW(3:0) directly selects mode 0-8 (values 9-15 wrap to 8).
 
 entity mode_mux is
   generic (
@@ -12,9 +11,9 @@ entity mode_mux is
   port (
     clk         : in  std_logic;
     rst         : in  std_logic;
-    rot_press   : in  std_logic;
+    sw          : in  std_logic_vector(3 downto 0);
     active_mode : out integer range 0 to G_NUM_MODES-1;
-    mode_name   : out std_logic_vector(127 downto 0)  -- 16 chars
+    mode_name   : out std_logic_vector(127 downto 0)
   );
 end entity mode_mux;
 
@@ -23,7 +22,6 @@ architecture rtl of mode_mux is
 
   type name_array is array (0 to G_NUM_MODES-1) of std_logic_vector(127 downto 0);
 
-  -- Helper: convert string to 128-bit vector (16 chars, padded with spaces)
   function str_to_slv(s : string) return std_logic_vector is
     variable result : std_logic_vector(127 downto 0) := (others => '0');
   begin
@@ -32,7 +30,7 @@ architecture rtl of mode_mux is
         result(127 - (i-1)*8 downto 120 - (i-1)*8) :=
           std_logic_vector(to_unsigned(character'pos(s(i)), 8));
       else
-        result(127 - (i-1)*8 downto 120 - (i-1)*8) := x"20";  -- space
+        result(127 - (i-1)*8 downto 120 - (i-1)*8) := x"20";
       end if;
     end loop;
     return result;
@@ -52,15 +50,17 @@ architecture rtl of mode_mux is
 begin
 
   process(clk)
+    variable sw_val : integer;
   begin
     if rising_edge(clk) then
       if rst = '1' then
         mode_idx <= 0;
-      elsif rot_press = '1' then
-        if mode_idx = G_NUM_MODES - 1 then
-          mode_idx <= 0;
+      else
+        sw_val := to_integer(unsigned(sw));
+        if sw_val >= G_NUM_MODES then
+          mode_idx <= G_NUM_MODES - 1;
         else
-          mode_idx <= mode_idx + 1;
+          mode_idx <= sw_val;
         end if;
       end if;
     end if;
