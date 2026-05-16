@@ -5,6 +5,8 @@
 Board Explorer demo for the Xilinx Spartan-3E Starter Kit (XC3S500E-FG320-4).
 Press the rotary encoder to cycle through 9 demo modes exercising every board peripheral.
 
+See **[Demo Guide](docs/demo.md)** for usage instructions.
+
 ## Design
 
 - `src/top.vhd` — top-level: mode mux, output routing, shared infrastructure
