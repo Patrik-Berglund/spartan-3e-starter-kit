@@ -32,7 +32,7 @@ sudo xc3sprog -c xpc -p 0 build/top.bit
 - All source in `src/`, constraints in `constraints/`, build scripts in `build/`
 - Top-level entity is always named `top`
 - UCF format for constraints (not XDC)
-- Keep designs simple and self-contained — no IP cores or external dependencies
+- Keep designs simple and self-contained — free Xilinx IP cores (MIG, CoreGen) are OK, no paid licenses
 - Commit and push after every meaningful change — don't batch up work
 
 ## XST / VHDL-93 Gotchas (Learned)
