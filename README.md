@@ -1,5 +1,7 @@
 # Spartan-3E Starter Kit Demo
 
+![Spartan-3E Starter Kit Board](docs/board.jpg)
+
 LED blinker demo for the Xilinx Spartan-3E Starter Kit (XC3S500E-FG320-4).
 
 ## Requirements
