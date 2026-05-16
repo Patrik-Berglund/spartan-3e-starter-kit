@@ -13,6 +13,21 @@ Press the rotary encoder to cycle through 9 demo modes exercising every board pe
 - `constraints/top.ucf` — all pin assignments
 - `build/top.xst`, `build/top.prj` — synthesis scripts
 
+## Documentation
+
+- [Pin Assignments](docs/pinout.md)
+- [Clock Sources](docs/clock-sources.md)
+- [Switches, Buttons & LEDs](docs/switches-buttons-leds.md)
+- [Character LCD](docs/lcd.md)
+- [SPI Bus (DAC, ADC, AMP, Flash)](docs/spi-bus.md)
+- [RS-232 Serial Ports](docs/rs232.md)
+- [PS/2 Keyboard/Mouse](docs/ps2.md)
+- [VGA Display](docs/vga.md)
+- [DDR SDRAM](docs/ddr-sdram.md)
+- [10/100 Ethernet](docs/ethernet.md)
+- [Expansion Connectors](docs/expansion.md)
+- [FPGA Configuration](docs/configuration.md)
+
 ## Board Specifications
 
 | Feature | Details |
@@ -144,11 +159,3 @@ Connect the board via USB-JTAG (see above), then:
 ```bash
 sudo xc3sprog -c xpc -p 0 build/top.bit
 ```
-
-## Design
-
-- `src/top.vhd` — top-level: mode mux, output routing, shared infrastructure
-- `src/infrastructure/` — debounce, rotary decoder, SPI master, LCD controller, mode mux
-- `src/mode1_led_chaser/` through `src/mode9_ethernet_ping/` — one module per peripheral
-- `constraints/top.ucf` — all pin assignments
-- `build/top.xst`, `build/top.prj` — synthesis scripts
