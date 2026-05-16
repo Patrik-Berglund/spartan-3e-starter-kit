@@ -1,0 +1,1968 @@
+The content and copyrights of the attached
+ material are the property of its owner.
+Distributed by:
+www.Jameco.com ✦ 1-800-831-4242
+January 2007 Rev 10 1/55
+1
+M25P16
+16 Mbit, low voltage, Serial Flash memory
+with 50 MHz SPI bus interface
+Features
+■ 16 Mbit of Flash memory
+■ Page Program (up to 256 Bytes) in 0.64ms
+(typical)
+■ Sector Erase (512 Kbit) in 0.6s (typical)
+■ Bulk Erase (16 Mbit) in 13s (typical)
+■ 2.7 V to 3.6 VV Single Supply Voltage
+■ SPI Bus Compatible Serial Interface
+■ 50 MHz Clock Rate (maximum)
+■ Deep Power-down Mode 1µA (typical)
+■ Electronic Signatures
+– JEDEC standard two-byte signature
+(2015h)
+– RES instruction, one-byte, signature (14h),
+for backward compatibility
+■ More than 100 000 Erase/Program cycles per
+Sector
+■ Hardware Write Protection: protected area size
+defined by three non-volatile bits (BP0, BP1
+and BP2)
+■ More than 20 year data retention
+■ Packages
+– ECOPACK® (RoHS compliant)
+
+VDFPN8 (ME)
+8x6mm (MLP8)
+SO16 (MF)
+300 mils width
+VFQFPN8 (MP)
+6 × 5 mm (MLP8)
+SO8N (MN)
+150 mils width
+SO8W (MW)
+208 mils width
+www.st.com
+Contents M25P16
+2/55
+Contents
+1 Description . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+2 Signal description . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+2.1 Serial Data Output (Q) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+2.2 Serial Data Input (D) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+2.3 Serial Clock (C) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+2.4 Chip Select (S) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+2.5 Hold (HOLD) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+2.6 Write Protect (W) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+2.7 VCC supply voltage . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+2.8 VSS ground . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+3 SPI modes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+4 Operating features . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+4.1 Page programming . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+4.2 Sector Erase and Bulk Erase . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+4.3 Polling during a Write, Program or Erase cycle . . . . . . . . . . . . . . . . . . . . 12
+4.4 Active Power, Stand-by Power and Deep Power-Down modes . . . . . . . . 12
+4.5 Status Register . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+4.6 Protection modes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+4.7 Hold condition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+5 Memory organization . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+6 Instructions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+6.1 Write Enable (WREN) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+6.2 Write Disable (WRDI) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+6.3 Read Identification (RDID) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+6.4 Read Status Register (RDSR) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+6.4.1 WIP bit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+6.4.2 WEL bit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+6.4.3 BP2, BP1, BP0 bits . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+M25P16 Contents
+ 3/55
+6.4.4 SRWD bit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+6.5 Write Status Register (WRSR) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+6.6 Read Data Bytes (READ) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 26
+6.7 Read Data Bytes at Higher Speed (FAST_READ) . . . . . . . . . . . . . . . . . . 27
+6.8 Page Program (PP) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+6.9 Sector Erase (SE) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+6.10 Bulk Erase (BE) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+6.11 Deep Power-down (DP) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+6.12 Release from Deep Power-down and Read Electronic Signature (RES) . 33
+7 Power-up and Power-down . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 35
+8 Initial delivery state . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37
+9 Maximum rating . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37
+10 DC and AC parameters . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+11 Package mechanical . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+12 Part numbering . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 52
+13 Revision history . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+List of tables M25P16
+4/55
+List of tables
+Table 1. Signal names . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+Table 2. Protected area sizes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+Table 3. Memory organization . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+Table 4. Instruction set . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+Table 5. Read Identification (RDID) data-out sequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+Table 6. Status Register format . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+Table 7. Protection modes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25
+Table 8. Power-Up timing and VWI threshold. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36
+Table 9. Absolute maximum ratings . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37
+Table 10. Operating conditions. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+Table 11. Data retention and endurance . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+Table 12. AC measurement conditions. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+Table 13. Capacitance . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+Table 14. DC characteristics. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39
+Table 15. AC characteristics (Grade 6) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 40
+Table 16. AC characteristics (Grade 6, T9HX (0.11µm) technology) . . . . . . . . . . . . . . . . . . . . . . . . . 41
+Table 17. AC characteristics (25 MHz operation, Grade 3) . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 43
+Table 18. VFQFPN8 (MLP8) 8-lead Very thin Fine Pitch Quad Flat Package No lead,
+6 × 5 mm, package mechanical data . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+Table 19. VDFPN8 (MLP8) 8-lead Very thin Dual Flat Package No lead, 8 × 6mm,
+package mechanical data . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 48
+Table 20. SO8N – 8 lead Plastic Small Outline, 150 mils body width, package
+mechanical data . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 49
+Table 21. SO8 wide – 8 lead Plastic Small Outline, 208 mils body width,
+package mechanical data . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 50
+Table 22. SO16 wide – 16-lead Plastic Small Outline, 300 mils body width, mechanical data. . . . . . 51
+Table 23. Ordering information scheme . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 52
+Table 24. Document revision history . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 53
+M25P16 List of figures
+ 5/55
+List of figures
+Figure 1. Logic diagram . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+Figure 2. SO8, VFQFPN and VDFPN connections . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+Figure 3. SO16 connections . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+Figure 4. Bus master and memory devices on the SPI bus. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+Figure 5. SPI modes supported . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+Figure 6. Hold condition activation. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+Figure 7. Block diagram . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+Figure 8. Write Enable (WREN) instruction sequence. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+Figure 9. Write Disable (WRDI) instruction sequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+Figure 10. Read Identification (RDID) instruction sequence and data-out sequence . . . . . . . . . . . . . 21
+Figure 11. Read Status Register (RDSR) instruction sequence and data-out sequence . . . . . . . . . . 23
+Figure 12. Write Status Register (WRSR) instruction sequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+Figure 13. Read Data Bytes (READ) instruction sequence and data-out sequence . . . . . . . . . . . . . . 26
+Figure 14. Read Data Bytes at Higher Speed (FAST_READ) instruction sequence
+and data-out sequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 27
+Figure 15. Page Program (PP) instruction sequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29
+Figure 16. Sector Erase (SE) instruction sequence. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30
+Figure 17. Bulk Erase (BE) instruction sequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+Figure 18. Deep Power-down (DP) instruction sequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32
+Figure 19. Release from Deep Power-down and Read Electronic Signature (RES) instruction
+sequence and data-out sequence . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34
+Figure 20. Release from Deep Power-down (RES) instruction sequence . . . . . . . . . . . . . . . . . . . . . . 34
+Figure 21. Power-up timing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36
+Figure 22. AC measurement I/O waveform . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38
+Figure 23. Serial input timing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44
+Figure 24. Write Protect setup and hold timing during WRSR when SRWD = 1 . . . . . . . . . . . . . . . . . 45
+Figure 25. Hold timing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 45
+Figure 26. Output timing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 46
+Figure 27. VFQFPN8 (MLP8) 8-lead Very thin Fine Pitch Quad Flat Package No lead,
+6 × 5 mm, package outline . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 47
+Figure 28. VDFPN8 (MLP8) 8-lead Very thin Dual Flat Package No lead, 8 × 6mm,
+package outline. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 48
+Figure 29. SO8N – 8 lead Plastic Small Outline, 150 mils body width, package outline . . . . . . . . . . . 49
+Figure 30. SO8W – 8 lead Plastic Small Outline, 208 mils body width, package outline. . . . . . . . . . . 50
+Figure 31. SO16 wide – 16-lead Plastic Small Outline, 300 mils body width, package outline . . . . . . 51
+Description M25P16
+6/55
+1 Description
+The M25P16 is a 16 Mbit (2 M × 8) Serial Flash memory, with advanced write protection
+mechanisms, accessed by a high speed SPI-compatible bus.
+The memory can be programmed 1 to 256 bytes at a time, using the Page Program
+instruction.
+The memory is organized as 32 sectors, each containing 256 pages. Each page is 256
+bytes wide. Thus, the whole memory can be viewed as consisting of 8192 pages, or 2 097
+152 bytes.
+The whole memory can be erased using the Bulk Erase instruction, or a sector at a time,
+using the Sector Erase instruction.
+In order to meet environmental requirements, ST offers the M25P16 in ECOPACK®
+packages.
+ECOPACK® packages are Lead-free and RoHS compliant.
+ECOPACK is an ST trademark. ECOPACK specifications are available at: www.st.com.
+Figure 1. Logic diagram
+
+Table 1. Signal names
+Signal name Function Direction
+C Serial Clock Input
+D Serial Data Input Input
+Q Serial Data Output Output
+S Chip Select Input
+W Write Protect Input
+HOLD Hold Input
+VCC Supply voltage
+VSS Ground
+AI05762
+S
+VCC
+M25P16
+HOLD
+VSS
+W
+Q
+C
+D
+M25P16 Description
+ 7/55
+Figure 2. SO8, VFQFPN and VDFPN connections
+1. There is an exposed central pad on the underside of the VFQFPN package. This is pulled, internally, to
+VSS, and must not be allowed to be connected to any other voltage or signal line on the PCB.
+2. See Package mechanical section for package dimensions, and how to identify pin-1.
+Figure 3. SO16 connections
+1. DU = Don’t Use
+2. See Package mechanical section for package dimensions, and how to identify pin-1.
+1
+AI08517
+2
+3
+4
+8
+7
+6
+VSS 5 D
+C
+Q HOLD
+SVCC
+W
+M25P16
+1
+AI08594B
+2
+3
+4
+16
+15
+14
+13
+DU
+DU
+DU
+DU
+VCC
+HOLD
+DU DU
+M25P16
+5
+6
+7
+8
+12
+11
+10
+Q 9 W
+VSS
+DU
+DU
+S
+D
+C
+Signal description M25P16
+8/55
+2 Signal description
+2.1 Serial Data Output (Q)
+This output signal is used to transfer data serially out of the device. Data is shifted out on the
+falling edge of Serial Clock (C).
+2.2 Serial Data Input (D)
+This input signal is used to transfer data serially into the device. It receives instructions,
+addresses, and the data to be programmed. Values are latched on the rising edge of Serial
+Clock (C).
+2.3 Serial Clock (C)
+This input signal provides the timing of the serial interface. Instructions, addresses, or data
+present at Serial Data Input (D) are latched on the rising edge of Serial Clock (C). Data on
+Serial Data Output (Q) changes after the falling edge of Serial Clock (C).
+2.4 Chip Select (S)
+When this input signal is High, the device is deselected and Serial Data Output (Q) is at high
+impedance. Unless an internal Program, Erase or Write Status Register cycle is in progress,
+the device will be in the Standby mode (this is not the Deep Power-down mode). Driving
+Chip Select (S) Low selects the device, placing it in the Active Power mode.
+After Power-up, a falling edge on Chip Select (S) is required prior to the start of any
+instruction.
+2.5 Hold (HOLD)
+The Hold (HOLD) signal is used to pause any serial communications with the device without
+deselecting the device.
+During the Hold condition, the Serial Data Output (Q) is high impedance, and Serial Data
+Input (D) and Serial Clock (C) are Don’t Care.
+To start the Hold condition, the device must be selected, with Chip Select (S) driven Low.
+2.6 Write Protect (W)
+The main purpose of this input signal is to freeze the size of the area of memory that is
+protected against program or erase instructions (as specified by the values in the BP2, BP1
+and BP0 bits of the Status Register).
+M25P16 Signal description
+ 9/55
+2.7 VCC supply voltage
+VCC is the supply voltage.
+2.8 VSS ground
+VSS is the reference for the VCC supply voltage.
+SPI modes M25P16
+10/55
+3 SPI modes
+These devices can be driven by a microcontroller with its SPI peripheral running in either of
+the two following modes:
+● CPOL=0, CPHA=0
+● CPOL=1, CPHA=1
+For these two modes, input data is latched in on the rising edge of Serial Clock (C), and
+output data is available from the falling edge of Serial Clock (C).
+The difference between the two modes, as shown in Figure 5, is the clock polarity when the
+bus master is in Stand-by mode and not transferring data:
+● C remains at 0 for (CPOL=0, CPHA=0)
+● C remains at 1 for (CPOL=1, CPHA=1)
+Figure 4. Bus master and memory devices on the SPI bus
+1. The Write Protect (W) and Hold (HOLD) signals should be driven, High or Low as appropriate.
+Figure 4 shows an example of three devices connected to an MCU, on an SPI bus. Only one
+device is selected at a time, so only one device drives the Serial Data Output (Q) line at a
+time, the other devices are high impedance. Resistors R (represented in Figure 4) ensure
+that the M25P16 is not selected if the Bus Master leaves the S line in the high impedance
+state. As the Bus Master may enter a state where all inputs/outputs are in high impedance
+at the same time (for example, when the Bus Master is reset), the clock line (C) must be
+connected to an external pull-down resistor so that, when all inputs/outputs become high
+impedance, the S line is pulled High while the C line is pulled Low (thus ensuring that S and
+C do not become High at the same time, and so, that the tSHCH requirement is met). The
+typical value of R is 100 kΩ, assuming that the time constant R*Cp (Cp = parasitic
+capacitance of the bus line) is shorter than the time during which the Bus Master leaves the
+SPI bus in high impedance.
+AI12836b
+SPI Bus Master
+SPI Memory
+Device
+SDO
+SDI
+SCK
+CQD
+S
+SPI Memory
+Device
+CQD
+S
+SPI Memory
+Device
+CQD
+S
+CS3 CS2 CS1
+SPI Interface with
+(CPOL, CPHA) =
+(0, 0) or (1, 1)
+W HOLD W HOLD W HOLD
+RR R
+VCC
+VCC VCC VCC
+VSS
+VSS VSS VSS
+R
+M25P16 SPI modes
+ 11/55
+Example: Cp = 50 pF, that is R*Cp = 5 µs <=> the application must ensure that the Bus
+Master never leaves the SPI bus in the high impedance state for a time period shorter than
+5 µs.
+Figure 5. SPI modes supported
+AI01438B
+C
+MSB
+CPHA
+D
+0
+1
+CPOL
+0
+1
+Q
+C
+MSB
+Operating features M25P16
+12/55
+4 Operating features
+4.1 Page programming
+To program one data byte, two instructions are required: Write Enable (WREN), which is one
+byte, and a Page Program (PP) sequence, which consists of four bytes plus data. This is
+followed by the internal Program cycle (of duration tPP).
+To spread this overhead, the Page Program (PP) instruction allows up to 256 bytes to be
+programmed at a time (changing bits from 1 to 0), provided that they lie in consecutive
+addresses on the same page of memory.
+For optimized timings, it is recommended to use the Page Program (PP) instruction to
+program all consecutive targeted Bytes in a single sequence versus using several Page
+Program (PP) sequences with each containing only a few Bytes (see Page Program (PP)
+and Table 15: AC characteristics (Grade 6)).
+4.2 Sector Erase and Bulk Erase
+The Page Program (PP) instruction allows bits to be reset from 1 to 0. Before this can be
+applied, the bytes of memory need to have been erased to all 1s (FFh). This can be
+achieved either a sector at a time, using the Sector Erase (SE) instruction, or throughout the
+entire memory, using the Bulk Erase (BE) instruction. This starts an internal Erase cycle (of
+duration tSE or tBE).
+The Erase instruction must be preceded by a Write Enable (WREN) instruction.
+4.3 Polling during a Write, Program or Erase cycle
+A further improvement in the time to Write Status Register (WRSR), Program (PP) or Erase
+(SE or BE) can be achieved by not waiting for the worst case delay (tW, tPP, tSE, or tBE). The
+Write In Progress (WIP) bit is provided in the Status Register so that the application program
+can monitor its value, polling it to establish when the previous Write cycle, Program cycle or
+Erase cycle is complete.
+4.4 Active Power, Stand-by Power and Deep Power-Down modes
+When Chip Select (S) is Low, the device is selected, and in the Active Power mode.
+When Chip Select (S) is High, the device is deselected, but could remain in the Active Power
+mode until all internal cycles have completed (Program, Erase, Write Status Register). The
+device then goes in to the Stand-by Power mode. The device consumption drops to ICC1.
+The Deep Power-down mode is entered when the specific instruction (the Deep Powerdown (DP) instruction) is executed. The device consumption drops further to ICC2. The
+device remains in this mode until another specific instruction (the Release from Deep
+Power-down and Read Electronic Signature (RES) instruction) is executed.
+While in the Deep Power-down mode, the device ignores all Write, Program and Erase
+instructions (see Deep Power-down (DP)). This can be used as an extra software protection
+mechanism, when the device is not in active use, to protect the device from inadvertent
+Write, Program or Erase instructions.
+M25P16 Operating features
+ 13/55
+4.5 Status Register
+The Status Register contains a number of status and control bits that can be read or set (as
+appropriate) by specific instructions. See Section 6.4: Read Status Register (RDSR) for a
+detailed description of the Status Register bits.
+4.6 Protection modes
+The environments where non-volatile memory devices are used can be very noisy. No SPI
+device can operate correctly in the presence of excessive noise. To help combat this, the
+M25P16 features the following data protection mechanisms:
+● Power On Reset and an internal timer (tPUW) can provide protection against inadvertent
+changes while the power supply is outside the operating specification.
+● Program, Erase and Write Status Register instructions are checked that they consist of
+a number of clock pulses that is a multiple of eight, before they are accepted for
+execution.
+● All instructions that modify data must be preceded by a Write Enable (WREN)
+instruction to set the Write Enable Latch (WEL) bit. This bit is returned to its reset state
+by the following events:
+– Power-up
+– Write Disable (WRDI) instruction completion
+– Write Status Register (WRSR) instruction completion
+– Page Program (PP) instruction completion
+– Sector Erase (SE) instruction completion
+– Bulk Erase (BE) instruction completion
+● The Block Protect (BP2, BP1, BP0) bits allow part of the memory to be configured as
+read-only. This is the Software Protected Mode (SPM).
+● The Write Protect (W) signal allows the Block Protect (BP2, BP1, BP0) bits and Status
+Register Write Disable (SRWD) bit to be protected. This is the Hardware Protected
+Mode (HPM).
+● In addition to the low power consumption feature, the Deep Power-down mode offers
+extra software protection, as all Write, Program and Erase instructions are ignored.
+Operating features M25P16
+14/55
+
+4.7 Hold condition
+The Hold (HOLD) signal is used to pause any serial communications with the device without
+resetting the clocking sequence. However, taking this signal Low does not terminate any
+Write Status Register, Program or Erase cycle that is currently in progress.
+To enter the Hold condition, the device must be selected, with Chip Select (S) Low.
+The Hold condition starts on the falling edge of the Hold (HOLD) signal, provided that this
+coincides with Serial Clock (C) being Low (as shown in Figure 6).
+The Hold condition ends on the rising edge of the Hold (HOLD) signal, provided that this
+coincides with Serial Clock (C) being Low.
+If the falling edge does not coincide with Serial Clock (C) being Low, the Hold condition
+starts after Serial Clock (C) next goes Low. Similarly, if the rising edge does not coincide
+with Serial Clock (C) being Low, the Hold condition ends after Serial Clock (C) next goes
+Low. (This is shown in Figure 6).
+During the Hold condition, the Serial Data Output (Q) is high impedance, and Serial Data
+Input (D) and Serial Clock (C) are Don’t Care.
+Normally, the device is kept selected, with Chip Select (S) driven Low, for the whole duration
+of the Hold condition. This is to ensure that the state of the internal logic remains unchanged
+from the moment of entering the Hold condition.
+If Chip Select (S) goes High while the device is in the Hold condition, this has the effect of
+resetting the internal logic of the device. To restart communication with the device, it is
+necessary to drive Hold (HOLD) High, and then to drive Chip Select (S) Low. This prevents
+the device from going back to the Hold condition.
+Table 2. Protected area sizes
+Status Register
+Content Memory Content
+BP2
+Bit
+BP1
+Bit
+BP0
+Bit Protected Area Unprotected Area
+0 0 0 none All sectors(1) (32 sectors: 0 to 31)
+1. The device is ready to accept a Bulk Erase instruction if, and only if, all Block Protect (BP2, BP1, BP0) are
+0.
+0 0 1 Upper 32nd (Sector 31) Lower 31/32nds (31 sectors: 0 to 30)
+0 1 0 Upper sixteenth (two sectors: 30 and
+31) Lower 15/16ths (30 sectors: 0 to 29)
+0 1 1 Upper eighth (four sectors: 28 to 31) Lower seven-eighths (28 sectors: 0 to
+27)
+1 0 0 Upper quarter (eight sectors: 24 to 31) Lower three-quarters (24 sectors: 0 to
+23)
+1 0 1 Upper half (sixteen sectors: 16 to 31) Lower half (16 sectors: 0 to 15)
+1 1 0 All sectors (32 sectors: 0 to 31) none
+1 1 1 All sectors (32 sectors: 0 to 31) none
+M25P16 Operating features
+ 15/55
+Figure 6. Hold condition activation
+AI02029D
+HOLD
+C
+Hold
+Condition
+(standard use)
+Hold
+Condition
+(non-standard use)
+Memory organization M25P16
+16/55
+5 Memory organization
+The memory is organized as:
+● 2 097 152 bytes (8 bits each)
+● 32 sectors (512 Kbits, 65536 bytes each)
+● 8192 pages (256 bytes each).
+Each page can be individually programmed (bits are programmed from 1 to 0). The device is
+Sector or Bulk Erasable (bits are erased from 0 to 1) but not Page Erasable.
+Figure 7. Block diagram
+AI04987
+HOLD
+S
+W Control Logic High Voltage
+Generator
+I/O Shift Register
+Address Register
+and Counter
+256 Byte
+Data Buffer
+256 Bytes (Page Size)
+X Decoder
+Y Decoder
+Size of the
+read-only
+memory area
+C
+D
+Q
+Status
+Register
+00000h
+1FFFFFh
+000FFh
+M25P16 Memory organization
+ 17/55
+
+Table 3. Memory organization
+Sector Address Range
+31 1F0000h 1FFFFFh
+30 1E0000h 1EFFFFh
+29 1D0000h 1DFFFFh
+28 1C0000h 1CFFFFh
+27 1B0000h 1BFFFFh
+26 1A0000h 1AFFFFh
+25 190000h 19FFFFh
+24 180000h 18FFFFh
+23 170000h 17FFFFh
+22 160000h 16FFFFh
+21 150000h 15FFFFh
+20 140000h 14FFFFh
+19 130000h 13FFFFh
+18 120000h 12FFFFh
+17 110000h 11FFFFh
+16 100000h 10FFFFh
+15 0F0000h 0FFFFFh
+14 0E0000h 0EFFFFh
+13 0D0000h 0DFFFFh
+12 0C0000h 0CFFFFh
+11 0B0000h 0BFFFFh
+10 0A0000h 0AFFFFh
+9 090000h 09FFFFh
+8 080000h 08FFFFh
+7 070000h 07FFFFh
+6 060000h 06FFFFh
+5 050000h 05FFFFh
+4 040000h 04FFFFh
+3 030000h 03FFFFh
+2 020000h 02FFFFh
+1 010000h 01FFFFh
+0 000000h 00FFFFh
+Instructions M25P16
+18/55
+6 Instructions
+All instructions, addresses and data are shifted in and out of the device, most significant bit
+first.
+Serial Data Input (D) is sampled on the first rising edge of Serial Clock (C) after Chip Select
+(S) is driven Low. Then, the one-byte instruction code must be shifted in to the device, most
+significant bit first, on Serial Data Input (D), each bit being latched on the rising edges of
+Serial Clock (C).
+The instruction set is listed in Table 4.
+Every instruction sequence starts with a one-byte instruction code. Depending on the
+instruction, this might be followed by address bytes, or by data bytes, or by both or none.
+In the case of a Read Data Bytes (READ), Read Data Bytes at Higher Speed (Fast_Read),
+Read Status Register (RDSR), Read Identification (RDID) or Release from Deep Powerdown, and Read Electronic Signature (RES) instruction, the shifted-in instruction sequence
+is followed by a data-out sequence. Chip Select (S) can be driven High after any bit of the
+data-out sequence is being shifted out.
+In the case of a Page Program (PP), Sector Erase (SE), Bulk Erase (BE), Write Status
+Register (WRSR), Write Enable (WREN), Write Disable (WRDI) or Deep Power-down (DP)
+instruction, Chip Select (S) must be driven High exactly at a byte boundary, otherwise the
+instruction is rejected, and is not executed. That is, Chip Select (S) must driven High when
+the number of clock pulses after Chip Select (S) being driven Low is an exact multiple of
+eight.
+All attempts to access the memory array during a Write Status Register cycle, Program
+cycle or Erase cycle are ignored, and the internal Write Status Register cycle, Program
+cycle or Erase cycle continues unaffected.
+M25P16 Instructions
+ 19/55
+
+6.1 Write Enable (WREN)
+The Write Enable (WREN) instruction (Figure 8) sets the Write Enable Latch (WEL) bit.
+The Write Enable Latch (WEL) bit must be set prior to every Page Program (PP), Sector
+Erase (SE), Bulk Erase (BE) and Write Status Register (WRSR) instruction.
+The Write Enable (WREN) instruction is entered by driving Chip Select (S) Low, sending the
+instruction code, and then driving Chip Select (S) High.
+Figure 8. Write Enable (WREN) instruction sequence
+Table 4. Instruction set
+Instruction Description One-byte Instruction
+Code
+Address
+Bytes
+Dummy
+Bytes
+Data
+Bytes
+WREN Write Enable 0000 0110 06h 0 0 0
+WRDI Write Disable 0000 0100 04h 0 0 0
+RDID Read Identification 1001 1111 9Fh 0 0 1 to 3
+RDSR Read Status Register 0000 0101 05h 0 0 1 to ∞
+WRSR Write Status Register 0000 0001 01h 0 0 1
+READ Read Data Bytes 0000 0011 03h 3 0 1 to ∞
+FAST_READ Read Data Bytes at Higher
+Speed 0000 1011 0Bh 3 1 1 to ∞
+PP Page Program 0000 0010 02h 3 0 1 to 256
+SE Sector Erase 1101 1000 D8h 3 0 0
+BE Bulk Erase 1100 0111 C7h 0 0 0
+DP Deep Power-down 1011 1001 B9h 0 0 0
+RES
+Release from Deep
+Power-down, and Read
+Electronic Signature 1010 1011 ABh
+0 3 1 to ∞
+Release from Deep
+Power-down 0 0 0
+C
+D
+AI02281E
+S
+Q
+1 34567 2
+High Impedance
+0
+Instruction
+Instructions M25P16
+20/55
+6.2 Write Disable (WRDI)
+The Write Disable (WRDI) instruction (Figure 9) resets the Write Enable Latch (WEL) bit.
+The Write Disable (WRDI) instruction is entered by driving Chip Select (S) Low, sending the
+instruction code, and then driving Chip Select (S) High.
+The Write Enable Latch (WEL) bit is reset under the following conditions:
+● Power-up
+● Write Disable (WRDI) instruction completion
+● Write Status Register (WRSR) instruction completion
+● Page Program (PP) instruction completion
+● Sector Erase (SE) instruction completion
+● Bulk Erase (BE) instruction completion
+Figure 9. Write Disable (WRDI) instruction sequence
+C
+D
+AI03750D
+S
+Q
+1 34567 2
+High Impedance
+0
+Instruction
+M25P16 Instructions
+ 21/55
+6.3 Read Identification (RDID)
+The Read Identification (RDID) instruction allows the 8-bit manufacturer identification to be
+read, followed by two bytes of device identification. The manufacturer identification is
+assigned by JEDEC, and has the value 20h for STMicroelectronics. The device identification
+is assigned by the device manufacturer, and indicates the memory type in the first byte
+(20h), and the memory capacity of the device in the second byte (15h).
+Any Read Identification (RDID) instruction while an Erase or Program cycle is in progress, is
+not decoded, and has no effect on the cycle that is in progress.
+The Read Identification (RDID) instruction should not be issued while the device is in Deep
+Power-down mode.
+The device is first selected by driving Chip Select (S) Low. Then, the 8-bit instruction code
+for the instruction is shifted in. This is followed by the 24-bit device identification, stored in
+the memory, being shifted out on Serial Data Output (Q), each bit being shifted out during
+the falling edge of Serial Clock (C).
+The instruction sequence is shown in Figure 10.
+The Read Identification (RDID) instruction is terminated by driving Chip Select (S) High at
+any time during data output.
+When Chip Select (S) is driven High, the device is put in the Stand-by Power mode. Once in
+the Stand-by Power mode, the device waits to be selected, so that it can receive, decode
+and execute instructions.
+
+Figure 10. Read Identification (RDID) instruction sequence and data-out sequence
+Table 5. Read Identification (RDID) data-out sequence
+Manufacturer Identification
+Device Identification
+Memory Type Memory Capacity
+20h 20h 15h
+C
+D
+S
+1 3 4 5 6 7 8 9 10 11 12 13 14 15 2
+Instruction
+0
+AI06809b
+Q
+Manufacturer Identification
+High Impedance
+MSB
+15 14 13 3 2 1 0
+Device Identification
+MSB
+16 17 18 28 29 30 31
+Instructions M25P16
+22/55
+6.4 Read Status Register (RDSR)
+The Read Status Register (RDSR) instruction allows the Status Register to be read. The
+Status Register may be read at any time, even while a Program, Erase or Write Status
+Register cycle is in progress. When one of these cycles is in progress, it is recommended to
+check the Write In Progress (WIP) bit before sending a new instruction to the device. It is
+also possible to read the Status Register continuously, as shown in Figure 11.
+
+The status and control bits of the Status Register are as follows:
+6.4.1 WIP bit
+The Write In Progress (WIP) bit indicates whether the memory is busy with a Write Status
+Register, Program or Erase cycle. When set to 1, such a cycle is in progress, when reset to
+0 no such cycle is in progress.
+6.4.2 WEL bit
+The Write Enable Latch (WEL) bit indicates the status of the internal Write Enable Latch.
+When set to 1 the internal Write Enable Latch is set, when set to 0 the internal Write Enable
+Latch is reset and no Write Status Register, Program or Erase instruction is accepted.
+6.4.3 BP2, BP1, BP0 bits
+The Block Protect (BP2, BP1, BP0) bits are non-volatile. They define the size of the area to
+be software protected against Program and Erase instructions. These bits are written with
+the Write Status Register (WRSR) instruction. When one or more of the Block Protect (BP2,
+BP1, BP0) bits is set to 1, the relevant memory area (as defined in Table 2) becomes
+protected against Page Program (PP) and Sector Erase (SE) instructions. The Block Protect
+(BP2, BP1, BP0) bits can be written provided that the Hardware Protected mode has not
+been set. The Bulk Erase (BE) instruction is executed if, and only if, all Block Protect (BP2,
+BP1, BP0) bits are 0.
+6.4.4 SRWD bit
+The Status Register Write Disable (SRWD) bit is operated in conjunction with the Write
+Protect (W) signal. The Status Register Write Disable (SRWD) bit and Write Protect (W)
+signal allow the device to be put in the Hardware Protected mode (when the Status Register
+Write Disable (SRWD) bit is set to 1, and Write Protect (W) is driven Low). In this mode, the
+non-volatile bits of the Status Register (SRWD, BP2, BP1, BP0) become read-only bits and
+the Write Status Register (WRSR) instruction is no longer accepted for execution.
+Table 6. Status Register format
+b7 b0
+SRWD 0 0 BP2 BP1 BP0 WEL WIP
+Status Register Write Protect
+Block Protect Bits
+Write Enable Latch Bit
+Write In Progress Bit
+M25P16 Instructions
+ 23/55
+Figure 11. Read Status Register (RDSR) instruction sequence and data-out
+sequence
+C
+D
+S
+1 3 4 5 6 7 8 9 10 11 12 13 14 15 2
+Instruction
+0
+AI02031E
+Q 7 6543210
+Status Register Out
+High Impedance
+MSB
+7 6543210
+Status Register Out
+MSB
+7
+Instructions M25P16
+24/55
+6.5 Write Status Register (WRSR)
+The Write Status Register (WRSR) instruction allows new values to be written to the Status
+Register. Before it can be accepted, a Write Enable (WREN) instruction must previously
+have been executed. After the Write Enable (WREN) instruction has been decoded and
+executed, the device sets the Write Enable Latch (WEL).
+The Write Status Register (WRSR) instruction is entered by driving Chip Select (S) Low,
+followed by the instruction code and the data byte on Serial Data Input (D).
+The instruction sequence is shown in Figure 12.
+The Write Status Register (WRSR) instruction has no effect on b6, b5, b1 and b0 of the
+Status Register. b6 and b5 are always read as 0.
+Chip Select (S) must be driven High after the eighth bit of the data byte has been latched in.
+If not, the Write Status Register (WRSR) instruction is not executed. As soon as Chip Select
+(S) is driven High, the self-timed Write Status Register cycle (whose duration is tW) is
+initiated. While the Write Status Register cycle is in progress, the Status Register may still
+be read to check the value of the Write In Progress (WIP) bit. The Write In Progress (WIP)
+bit is 1 during the self-timed Write Status Register cycle, and is 0 when it is completed.
+When the cycle is completed, the Write Enable Latch (WEL) is reset.
+The Write Status Register (WRSR) instruction allows the user to change the values of the
+Block Protect (BP2, BP1, BP0) bits, to define the size of the area that is to be treated as
+read-only, as defined in Table 2. The Write Status Register (WRSR) instruction also allows
+the user to set or reset the Status Register Write Disable (SRWD) bit in accordance with the
+Write Protect (W) signal. The Status Register Write Disable (SRWD) bit and Write Protect
+(W) signal allow the device to be put in the Hardware Protected Mode (HPM). The Write
+Status Register (WRSR) instruction is not executed once the Hardware Protected Mode
+(HPM) is entered.
+Figure 12. Write Status Register (WRSR) instruction sequence
+C
+D
+AI02282D
+S
+Q
+1 3 4 5 6 7 8 9 10 11 12 13 14 15 2
+High Impedance
+Instruction Status
+Register In
+0
+765432 0 1
+MSB
+M25P16 Instructions
+ 25/55
+
+The protection features of the device are summarized in Table 7.
+When the Status Register Write Disable (SRWD) bit of the Status Register is 0 (its initial
+delivery state), it is possible to write to the Status Register provided that the Write Enable
+Latch (WEL) bit has previously been set by a Write Enable (WREN) instruction, regardless
+of the whether Write Protect (W) is driven High or Low.
+When the Status Register Write Disable (SRWD) bit of the Status Register is set to 1, two
+cases need to be considered, depending on the state of Write Protect (W):
+● If Write Protect (W) is driven High, it is possible to write to the Status Register provided
+that the Write Enable Latch (WEL) bit has previously been set by a Write Enable
+(WREN) instruction.
+● If Write Protect (W) is driven Low, it is not possible to write to the Status Register even
+if the Write Enable Latch (WEL) bit has previously been set by a Write Enable (WREN)
+instruction. (Attempts to write to the Status Register are rejected, and are not accepted
+for execution). As a consequence, all the data bytes in the memory area that are
+software protected (SPM) by the Block Protect (BP2, BP1, BP0) bits of the Status
+Register, are also hardware protected against data modification.
+Regardless of the order of the two events, the Hardware Protected Mode (HPM) can be
+entered:
+● by setting the Status Register Write Disable (SRWD) bit after driving Write Protect (W)
+Low
+● or by driving Write Protect (W) Low after setting the Status Register Write Disable
+(SRWD) bit.
+The only way to exit the Hardware Protected Mode (HPM) once entered is to pull Write
+Protect (W) High.
+If Write Protect (W) is permanently tied High, the Hardware Protected Mode (HPM) can
+never be activated, and only the Software Protected Mode (SPM), using the Block Protect
+(BP2, BP1, BP0) bits of the Status Register, can be used.
+Table 7. Protection modes
+W
+Signal
+SRWD
+Bit Mode Write Protection of the
+Status Register
+Memory Content
+Protected Area(1)
+1. As defined by the values in the Block Protect (BP2, BP1, BP0) bits of the Status Register, as shown in
+Unprotected
+Area(1)
+10
+Software
+Protected
+(SPM)
+Status Register is Writable
+(if the WREN instruction
+has set the WEL bit)
+The values in the SRWD,
+BP2, BP1 and BP0 bits
+can be changed
+Protected against
+Page Program,
+Sector Erase and
+Bulk Erase
+Ready to accept
+Page Program and
+Sector Erase
+instructions
+00
+11
+01
+Hardware
+Protected
+(HPM)
+Status Register is
+Hardware write protected
+The values in the SRWD,
+BP2, BP1 and BP0 bits
+cannot be changed
+Protected against
+Page Program,
+Sector Erase and
+Bulk Erase
+Ready to accept
+Page Program and
+Sector Erase
+instructions
+Instructions M25P16
+26/55
+6.6 Read Data Bytes (READ)
+The device is first selected by driving Chip Select (S) Low. The instruction code for the Read
+Data Bytes (READ) instruction is followed by a 3-byte address (A23-A0), each bit being
+latched-in during the rising edge of Serial Clock (C). Then the memory contents, at that
+address, is shifted out on Serial Data Output (Q), each bit being shifted out, at a maximum
+frequency fR, during the falling edge of Serial Clock (C).
+The instruction sequence is shown in Figure 13.
+The first byte addressed can be at any location. The address is automatically incremented
+to the next higher address after each byte of data is shifted out. The whole memory can,
+therefore, be read with a single Read Data Bytes (READ) instruction. When the highest
+address is reached, the address counter rolls over to 000000h, allowing the read sequence
+to be continued indefinitely.
+The Read Data Bytes (READ) instruction is terminated by driving Chip Select (S) High. Chip
+Select (S) can be driven High at any time during data output. Any Read Data Bytes (READ)
+instruction, while an Erase, Program or Write cycle is in progress, is rejected without having
+any effects on the cycle that is in progress.
+Figure 13. Read Data Bytes (READ) instruction sequence and data-out sequence
+1. Address bits A23 to A21 are Don’t Care.
+C
+D
+AI03748D
+S
+Q
+23
+1 3 4 5 6 7 8 9 10 28 29 30 31 32 33 34 35 2
+22 21 3 2 1 0
+36 37 38
+76543 1 7 0
+High Impedance
+Data Out 1
+Instruction 24-Bit Address
+0
+MSB
+MSB
+2
+39
+Data Out 2
+M25P16 Instructions
+ 27/55
+6.7 Read Data Bytes at Higher Speed (FAST_READ)
+The device is first selected by driving Chip Select (S) Low. The instruction code for the Read
+Data Bytes at Higher Speed (FAST_READ) instruction is followed by a 3-byte address (A23-
+A0) and a dummy byte, each bit being latched-in during the rising edge of Serial Clock (C).
+Then the memory contents, at that address, is shifted out on Serial Data Output (Q), each
+bit being shifted out, at a maximum frequency fC, during the falling edge of Serial Clock (C).
+The instruction sequence is shown in Figure 14.
+The first byte addressed can be at any location. The address is automatically incremented
+to the next higher address after each byte of data is shifted out. The whole memory can,
+therefore, be read with a single Read Data Bytes at Higher Speed (FAST_READ)
+instruction. When the highest address is reached, the address counter rolls over to
+000000h, allowing the read sequence to be continued indefinitely.
+The Read Data Bytes at Higher Speed (FAST_READ) instruction is terminated by driving
+Chip Select (S) High. Chip Select (S) can be driven High at any time during data output. Any
+Read Data Bytes at Higher Speed (FAST_READ) instruction, while an Erase, Program or
+Write cycle is in progress, is rejected without having any effects on the cycle that is in
+progress.
+Figure 14. Read Data Bytes at Higher Speed (FAST_READ) instruction sequence
+and data-out sequence
+1. Address bits A23 to A21 are Don’t Care.
+C
+D
+AI04006
+S
+Q
+23
+1 3 4 5 6 7 8 9 10 28 29 30 31 2
+22 21 3 2 1 0
+High Impedance
+Instruction 24 BIT ADDRESS
+0
+C
+D
+S
+Q
+32 33 34 36 37 38 39 40 41 42 43 44 45 46
+765432 0 1
+DATA OUT 1
+Dummy Byte
+MSB
+7 6543210
+DATA OUT 2
+MSB MSB
+7
+47
+765432 0 1
+35
+Instructions M25P16
+28/55
+6.8 Page Program (PP)
+The Page Program (PP) instruction allows bytes to be programmed in the memory
+(changing bits from 1 to 0). Before it can be accepted, a Write Enable (WREN) instruction
+must previously have been executed. After the Write Enable (WREN) instruction has been
+decoded, the device sets the Write Enable Latch (WEL).
+The Page Program (PP) instruction is entered by driving Chip Select (S) Low, followed by
+the instruction code, three address bytes and at least one data byte on Serial Data Input (D).
+If the 8 least significant address bits (A7-A0) are not all zero, all transmitted data that goes
+beyond the end of the current page are programmed from the start address of the same
+page (from the address whose 8 least significant bits (A7-A0) are all zero). Chip Select (S)
+must be driven Low for the entire duration of the sequence.
+The instruction sequence is shown in Figure 15.
+If more than 256 bytes are sent to the device, previously latched data are discarded and the
+last 256 data bytes are guaranteed to be programmed correctly within the same page. If less
+than 256 Data bytes are sent to device, they are correctly programmed at the requested
+addresses without having any effects on the other bytes of the same page.
+For optimized timings, it is recommended to use the Page Program (PP) instruction to
+program all consecutive targeted Bytes in a single sequence versus using several Page
+Program (PP) sequences with each containing only a few Bytes (see Table 15: AC
+characteristics (Grade 6)).
+Chip Select (S) must be driven High after the eighth bit of the last data byte has been
+latched in, otherwise the Page Program (PP) instruction is not executed.
+As soon as Chip Select (S) is driven High, the self-timed Page Program cycle (whose
+duration is tPP) is initiated. While the Page Program cycle is in progress, the Status Register
+may be read to check the value of the Write In Progress (WIP) bit. The Write In Progress
+(WIP) bit is 1 during the self-timed Page Program cycle, and is 0 when it is completed. At
+some unspecified time before the cycle is completed, the Write Enable Latch (WEL) bit is
+reset.
+A Page Program (PP) instruction applied to a page which is protected by the Block Protect
+(BP2, BP1, BP0) bits (see Table 2 and Table 3) is not executed.
+M25P16 Instructions
+ 29/55
+Figure 15. Page Program (PP) instruction sequence
+1. Address bits A23 to A21 are Don’t Care.
+C
+D
+AI04082B
+S
+40 41 43 44 45 46 47 48 49 50 52 53 54 55 42
+C
+D
+S
+23
+1 3 4 5 6 7 8 9 10 28 29 30 31 32 33 34 35 2
+22 21 3 2 1 0
+36 37 38
+Instruction 24-Bit Address
+0
+765432 0 1
+Data Byte 1
+39
+51
+765432 0 1
+Data Byte 2
+765432 0 1
+Data Byte 3 Data Byte 256 2073 2074 2075 2076 2077
+2078
+2079
+765432 0 1 2072
+MSB MSB
+MSB MSB MSB
+Instructions M25P16
+30/55
+6.9 Sector Erase (SE)
+The Sector Erase (SE) instruction sets to 1 (FFh) all bits inside the chosen sector. Before it
+can be accepted, a Write Enable (WREN) instruction must previously have been executed.
+After the Write Enable (WREN) instruction has been decoded, the device sets the Write
+Enable Latch (WEL).
+The Sector Erase (SE) instruction is entered by driving Chip Select (S) Low, followed by the
+instruction code, and three address bytes on Serial Data Input (D). Any address inside the
+Sector (see Table 3) is a valid address for the Sector Erase (SE) instruction. Chip Select (S)
+must be driven Low for the entire duration of the sequence.
+The instruction sequence is shown in Figure 16.
+Chip Select (S) must be driven High after the eighth bit of the last address byte has been
+latched in, otherwise the Sector Erase (SE) instruction is not executed. As soon as Chip
+Select (S) is driven High, the self-timed Sector Erase cycle (whose duration is tSE) is
+initiated. While the Sector Erase cycle is in progress, the Status Register may be read to
+check the value of the Write In Progress (WIP) bit. The Write In Progress (WIP) bit is 1
+during the self-timed Sector Erase cycle, and is 0 when it is completed. At some unspecified
+time before the cycle is completed, the Write Enable Latch (WEL) bit is reset.
+A Sector Erase (SE) instruction applied to a page which is protected by the Block Protect
+(BP2, BP1, BP0) bits (see Table 2 and Table 3) is not executed.
+Figure 16. Sector Erase (SE) instruction sequence
+1. Address bits A23 to A21 are Don’t Care.
+24 Bit Address
+C
+D
+AI03751D
+S
+1 3 4 5 6 7 8 9 29 30 31 2
+Instruction
+0
+23 22 2 0 1
+MSB
+M25P16 Instructions
+ 31/55
+6.10 Bulk Erase (BE)
+The Bulk Erase (BE) instruction sets all bits to 1 (FFh). Before it can be accepted, a Write
+Enable (WREN) instruction must previously have been executed. After the Write Enable
+(WREN) instruction has been decoded, the device sets the Write Enable Latch (WEL).
+The Bulk Erase (BE) instruction is entered by driving Chip Select (S) Low, followed by the
+instruction code on Serial Data Input (D). Chip Select (S) must be driven Low for the entire
+duration of the sequence.
+The instruction sequence is shown in Figure 17.
+Chip Select (S) must be driven High after the eighth bit of the instruction code has been
+latched in, otherwise the Bulk Erase instruction is not executed. As soon as Chip Select (S)
+is driven High, the self-timed Bulk Erase cycle (whose duration is tBE) is initiated. While the
+Bulk Erase cycle is in progress, the Status Register may be read to check the value of the
+Write In Progress (WIP) bit. The Write In Progress (WIP) bit is 1 during the self-timed Bulk
+Erase cycle, and is 0 when it is completed. At some unspecified time before the cycle is
+completed, the Write Enable Latch (WEL) bit is reset.
+The Bulk Erase (BE) instruction is executed only if all Block Protect (BP2, BP1, BP0) bits are
+0. The Bulk Erase (BE) instruction is ignored if one, or more, sectors are protected.
+Figure 17. Bulk Erase (BE) instruction sequence
+C
+D
+AI03752D
+S
+0 1 34567 2
+Instruction
+Instructions M25P16
+32/55
+6.11 Deep Power-down (DP)
+Executing the Deep Power-down (DP) instruction is the only way to put the device in the
+lowest consumption mode (the Deep Power-down mode). It can also be used as a software
+protection mechanism, while the device is not in active use, as in this mode, the device
+ignores all Write, Program and Erase instructions.
+Driving Chip Select (S) High deselects the device, and puts the device in the Standby mode
+(if there is no internal cycle currently in progress). But this mode is not the Deep Powerdown mode. The Deep Power-down mode can only be entered by executing the Deep
+Power-down (DP) instruction, subsequently reducing the standby current (from ICC1 to ICC2,
+as specified in Table 14).
+To take the device out of Deep Power-down mode, the Release from Deep Power-down and
+Read Electronic Signature (RES) instruction must be issued. No other instruction must be
+issued while the device is in Deep Power-down mode.
+The Release from Deep Power-down and Read Electronic Signature (RES) instruction also
+allows the Electronic Signature of the device to be output on Serial Data Output (Q).
+The Deep Power-down mode automatically stops at Power-down, and the device always
+Powers-up in the Standby mode.
+The Deep Power-down (DP) instruction is entered by driving Chip Select (S) Low, followed
+by the instruction code on Serial Data Input (D). Chip Select (S) must be driven Low for the
+entire duration of the sequence.
+The instruction sequence is shown in Figure 18.
+Chip Select (S) must be driven High after the eighth bit of the instruction code has been
+latched in, otherwise the Deep Power-down (DP) instruction is not executed. As soon as
+Chip Select (S) is driven High, it requires a delay of tDP before the supply current is reduced
+to ICC2 and the Deep Power-down mode is entered.
+Any Deep Power-down (DP) instruction, while an Erase, Program or Write cycle is in
+progress, is rejected without having any effects on the cycle that is in progress.
+Figure 18. Deep Power-down (DP) instruction sequence
+C
+D
+AI03753D
+S
+0 1 34567 2 t
+DP
+Stand-by Mode Deep Power-down Mode
+Instruction
+M25P16 Instructions
+ 33/55
+6.12 Release from Deep Power-down and Read Electronic
+Signature (RES)
+To take the device out of Deep Power-down mode, the Release from Deep Power-down and
+Read Electronic Signature (RES) instruction must be issued. No other instruction must be
+issued while the device is in Deep Power-down mode.
+The instruction can also be used to read, on Serial Data Output (Q), the old-style 8-bit
+Electronic Signature, whose value for the M25P16 is 14h.
+Please note that this is not the same as, or even a subset of, the JEDEC 16-bit Electronic
+Signature that is read by the Read Identifier (RDID) instruction. The old-style Electronic
+Signature is supported for reasons of backward compatibility, only, and should not be used
+for new designs. New designs should, instead, make use of the JEDEC 16-bit Electronic
+Signature, and the Read Identifier (RDID) instruction.
+Except while an Erase, Program or Write Status Register cycle is in progress, the Release
+from Deep Power-down and Read Electronic Signature (RES) instruction always provides
+access to the old-style 8-bit Electronic Signature of the device, and can be applied even if
+the Deep Power-down mode has not been entered.
+Any Release from Deep Power-down and Read Electronic Signature (RES) instruction while
+an Erase, Program or Write Status Register cycle is in progress, is not decoded, and has no
+effect on the cycle that is in progress.
+The device is first selected by driving Chip Select (S) Low. The instruction code is followed
+by 3 dummy bytes, each bit being latched-in on Serial Data Input (D) during the rising edge
+of Serial Clock (C). Then, the old-style 8-bit Electronic Signature, stored in the memory, is
+shifted out on Serial Data Output (Q), each bit being shifted out during the falling edge of
+Serial Clock (C).
+The instruction sequence is shown in Figure 19.
+The Release from Deep Power-down and Read Electronic Signature (RES) instruction is
+terminated by driving Chip Select (S) High after the Electronic Signature has been read at
+least once. Sending additional clock cycles on Serial Clock (C), while Chip Select (S) is
+driven Low, cause the Electronic Signature to be output repeatedly.
+When Chip Select (S) is driven High, the device is put in the Stand-by Power mode. If the
+device was not previously in the Deep Power-down mode, the transition to the Stand-by
+Power mode is immediate. If the device was previously in the Deep Power-down mode,
+though, the transition to the Stand-by Power mode is delayed by tRES2, and Chip Select (S)
+must remain High for at least tRES2(max), as specified in Table 15. Once in the Stand-by
+Power mode, the device waits to be selected, so that it can receive, decode and execute
+instructions.
+Instructions M25P16
+34/55
+Figure 19. Release from Deep Power-down and Read Electronic Signature (RES) instruction
+sequence and data-out sequence
+1. The value of the 8-bit Electronic Signature, for the M25P16, is 14h.
+Figure 20. Release from Deep Power-down (RES) instruction sequence
+Driving Chip Select (S) High after the 8-bit instruction byte has been received by the device, but before
+the whole of the 8-bit Electronic Signature has been transmitted for the first time (as shown in Figure 20),
+still ensures that the device is put into Stand-by Power mode. If the device was not previously in the Deep
+Power-down mode, the transition to the Stand-by Power mode is immediate. If the device was previously
+in the Deep Power-down mode, though, the transition to the Stand-by Power mode is delayed by tRES1,
+and Chip Select (S) must remain High for at least tRES1(max), as specified in Table 15. Once in the
+Stand-by Power mode, the device waits to be selected, so that it can receive, decode and execute
+instructions.
+C
+D
+AI04047C
+S
+Q
+23
+1 3 4 5 6 7 8 9 10 28 29 30 31 32 33 34 35 2
+22 21 3 2 1 0
+36 37 38
+765432 0 1
+High Impedance Electronic Signature Out
+Instruction 3 Dummy Bytes
+0
+MSB
+Deep Power-down Mode Stand-by Mode
+MSB
+t
+RES2
+C
+D
+AI04078B
+S
+0 1 34567 2 t
+RES1
+Deep Power-down Mode Stand-by Mode
+Q
+High Impedance
+Instruction
+M25P16 Power-up and Power-down
+ 35/55
+7 Power-up and Power-down
+At Power-up and Power-down, the device must not be selected (that is Chip Select (S) must
+follow the voltage applied on VCC) until VCC reaches the correct value:
+● VCC(min) at Power-up, and then for a further delay of tVSL
+● VSS at Power-down
+A safe configuration is provided in Section 3: SPI modes.
+To avoid data corruption and inadvertent write operations during power-up, a Power On
+Reset (POR) circuit is included. The logic inside the device is held reset while VCC is less
+than the Power On Reset (POR) threshold voltage, VWI – all operations are disabled, and
+the device does not respond to any instruction.
+Moreover, the device ignores all Write Enable (WREN), Page Program (PP), Sector Erase
+(SE), Bulk Erase (BE) and Write Status Register (WRSR) instructions until a time delay of
+tPUW has elapsed after the moment that VCC rises above the VWI threshold. However, the
+correct operation of the device is not guaranteed if, by this time, VCC is still below VCC(min).
+No Write Status Register, Program or Erase instructions should be sent until the later of:
+● tPUW after VCC passed the VWI threshold
+● tVSL after VCC passed the VCC(min) level
+These values are specified in Table 8.
+If the delay, tVSL, has elapsed, after VCC has risen above VCC(min), the device can be
+selected for READ instructions even if the tPUW delay is not yet fully elapsed.
+At Power-up, the device is in the following state:
+● The device is in the Standby mode (not the Deep Power-down mode).
+● The Write Enable Latch (WEL) bit is reset.
+● The Write In Progress (WIP) bit is reset.
+Normal precautions must be taken for supply rail decoupling, to stabilize the VCC supply.
+Each device in a system should have the VCC rail decoupled by a suitable capacitor close to
+the package pins. (Generally, this capacitor is of the order of 100 nF).
+At Power-down, when VCC drops from the operating voltage, to below the Power On Reset
+(POR) threshold voltage, VWI, all operations are disabled and the device does not respond
+to any instruction. (The designer needs to be aware that if a Power-down occurs while a
+Write, Program or Erase cycle is in progress, some data corruption can result.)
+Power-up and Power-down M25P16
+36/55
+Figure 21. Power-up timing
+
+1. These parameters are characterized only.
+Table 8. Power-Up timing and VWI threshold
+Symbol Parameter Min. Max. Unit
+tVSL(1) VCC(min) to S Low 30 µs
+tPUW(1) Time delay to Write instruction 1 10 ms
+VWI(1) Write Inhibit Voltage 1.5 2.5 V
+VCC
+AI04009C
+VCC(min)
+VWI
+ Reset State
+of the
+Device
+Chip Selection Not Allowed
+ Program, Erase and Write Commands are Rejected by the Device
+tVSL
+tPUW
+time
+Read Access allowed Device fully
+accessible
+VCC(max)
+M25P16 Initial delivery state
+ 37/55
+8 Initial delivery state
+The device is delivered with the memory array erased: all bits are set to 1 (each byte
+contains FFh). The Status Register contains 00h (all Status Register bits are 0).
+9 Maximum rating
+Stressing the device above the rating listed in the Absolute Maximum Ratings" table may
+cause permanent damage to the device. These are stress ratings only and operation of the
+device at these or any other conditions above those indicated in the Operating sections of
+this specification is not implied. Exposure to Absolute Maximum Rating conditions for
+extended periods may affect device reliability. Refer also to the STMicroelectronics SURE
+Program and other relevant quality documents.
+
+Table 9. Absolute maximum ratings
+Symbol Parameter Min. Max. Unit
+TSTG Storage Temperature –65 150 °C
+TLEAD Lead temperature during soldering see (1)
+1. Compliant with JEDEC Std J-STD-020C (for small body, Sn-Pb or Pb assembly), the ST ECOPACK®
+7191395 specification, and the European directive on Restrictions on Hazardous Substances (RoHS)
+2002/95/EU.
+°C
+VIO Input and Output Voltage (with respect to Ground) –0.6 VCC + 0.6 V
+VCC Supply Voltage –0.6 4.0 V
+VESD Electrostatic Discharge Voltage (Human Body model)(2)
+2. JEDEC Std JESD22-A114A (C1=100 pF, R1=1500 Ω, R2=500 Ω).
+–2000 2000 V
+DC and AC parameters M25P16
+38/55
+10 DC and AC parameters
+This section summarizes the operating and measurement conditions, and the DC and AC
+characteristics of the device. The parameters in the DC and AC Characteristic tables that
+follow are derived from tests performed under the Measurement Conditions summarized in
+the relevant tables. Designers should check that the operating conditions in their circuit
+match the measurement conditions when relying on the quoted parameters.
+
+
+
+1. Output Hi-Z is defined as the point where data out is no longer driven.
+Figure 22. AC measurement I/O waveform
+
+Table 10. Operating conditions
+Symbol Parameter Min. Max. Unit
+VCC Supply Voltage 2.7 3.6 V
+TA Ambient Operating Temperature
+grade 3 –40 125 °C
+grade 6 –40 85 °C
+Table 11. Data retention and endurance
+Parameter Condition Min. Max. Unit
+Erase/Program cycles
+Device Grade 6 100 000
+cycles per sector
+Device Grade 3 10 000
+Data Retention at 55 °C 20 years
+Table 12. AC measurement conditions
+Symbol Parameter Min. Max. Unit
+CL Load Capacitance 30 pF
+Input Rise and Fall Times 5 ns
+Input Pulse Voltages 0.2VCC to 0.8VCC V
+Input Timing Reference Voltages 0.3VCC to 0.7VCC V
+Output Timing Reference Voltages VCC / 2 V
+Table 13. Capacitance(1)
+1. Sampled only, not 100% tested, at TA=25°C and a frequency of 20MHz.
+Symbol Parameter Test Condition Min. Max. Unit
+COUT Output Capacitance (Q) VOUT = 0 V 8 pF
+CIN Input Capacitance (other pins) VIN = 0 V 6 pF
+AI07455
+0.8VCC
+0.2VCC
+0.7VCC
+0.3VCC
+Input and Output
+Timing Reference Levels
+Input Levels
+0.5VCC
+M25P16 DC and AC parameters
+ 39/55
+
+Table 14. DC characteristics
+Symbol Parameter Test condition (in addition
+to those in Table 10) Min. Max. Unit
+ILI Input leakage current ± 2 µA
+ILO Output leakage current ± 2 µA
+ICC1 Standby current
+Grade 6
+S = VCC, VIN = VSS or VCC
+50 µA
+Grade 3 100 µA
+ICC2
+Deep Power-down
+current
+Grade 6
+S = VCC, VIN = VSS or VCC
+10 µA
+Grade 3 100 µA
+ICC3 Operating current (READ)
+C = 0.1VCC / 0.9.VCC at
+50 MHz, Q = open 8 mA
+C = 0.1VCC / 0.9.VCC at
+20 MHz, Q = open 4 mA
+ICC4 Operating current (PP) S = VCC 15 mA
+ICC5 Operating current (WRSR) S = VCC 15 mA
+ICC6 Operating current (SE) S = VCC 15 mA
+ICC7 Operating current (BE) S = VCC 15 mA
+VIL Input low voltage – 0.5 0.3VCC V
+VIH Input high voltage 0.7VCC VCC+0.4 V
+VOL Output low voltage IOL = 1.6 mA 0.4 V
+VOH Output high voltage IOH = –100 µA VCC–0.2 V
+DC and AC parameters M25P16
+40/55
+
+Table 15. AC characteristics (Grade 6)
+Test conditions specified in Table 10 and Table 12
+Symbol Alt. Parameter Min. Typ. Max. Unit
+fC fC
+Clock Frequency(1) for the following instructions: FAST_READ,
+PP, SE, BE, DP, RES, WREN, WRDI, RDID, RDSR, WRSR D.C. 50 MHz
+fR Clock Frequency for READ instructions D.C. 20 MHz
+tCH(1) tCLH Clock High Time 9 ns
+tCL(1) tCLL Clock Low Time 9 ns
+tCLCH(2) Clock Rise Time(3) (peak to peak) 0.1 V/ns
+tCHCL(2) Clock Fall Time(3) (peak to peak) 0.1 V/ns
+tSLCH tCSS S Active Setup Time (relative to C) 5 ns
+tCHSL S Not Active Hold Time (relative to C) 5 ns
+tDVCH tDSU Data In Setup Time 2 ns
+tCHDX tDH Data In Hold Time 5 ns
+tCHSH S Active Hold Time (relative to C) 5 ns
+tSHCH S Not Active Setup Time (relative to C) 5 ns
+tSHSL tCSH S Deselect Time 100 ns
+tSHQZ(2) tDIS Output Disable Time 8 ns
+tCLQV tV Clock Low to Output Valid 8 ns
+tCLQX tHO Output Hold Time 0 ns
+tHLCH HOLD Setup Time (relative to C) 5 ns
+tCHHH HOLD Hold Time (relative to C) 5 ns
+tHHCH HOLD Setup Time (relative to C) 5 ns
+tCHHL HOLD Hold Time (relative to C) 5 ns
+tHHQX(2) tLZ HOLD to Output Low-Z 8 ns
+tHLQZ(2) tHZ HOLD to Output High-Z 8 ns
+tWHSL(4) Write Protect Setup Time 20 ns
+tSHWL(4) Write Protect Hold Time 100 ns
+tDP(2) S High to Deep Power-down Mode 3 µs
+tRES1(2) S High to Standby Mode without Electronic Signature Read 30 µs
+tRES2(2) S High to Standby Mode with Electronic Signature Read 30 µs
+tW Write Status Register Cycle Time 5 15 ms
+tPP(5)
+Page Program Cycle Time (256 Bytes) 1.4
+5 ms
+Page Program Cycle Time (n Bytes) 0.4+
+n*1/256
+tSE Sector Erase Cycle Time 1 3 s
+tBE Bulk Erase Cycle Time 17 40 s
+1. tCH + tCL must be greater than or equal to 1/ fC
+2. Value guaranteed by characterization, not 100% tested in production.
+3. Expressed as a slew-rate.
+4. Only applicable as a constraint for a WRSR instruction when SRWD is set at 1.
+5. When using the Page Program (PP) instruction to program consecutive Bytes, optimized timings are obtained with one
+sequence including all the Bytes versus several sequences of only a few Bytes. (1 ≤ n ≤ 256)
+M25P16 DC and AC parameters
+ 41/55
+
+Table 16. AC characteristics (Grade 6, T9HX (0.11µm) technology)
+(1)
+Applies only to products made with T9HX (0.11µm) Technology, identified with Process digit
+“4”(2)
+Test conditions specified in Table 10 and Table 12
+Symbol Alt. Parameter Min. Typ.(3) Max. Unit
+fC fC
+Clock Frequency for the following instructions:
+FAST_READ, PP, SE, BE, DP, RES, WREN,
+WRDI, RDID, RDSR, WRSR
+D.C. 50 MHz
+fR Clock Frequency for READ instructions D.C. 33 MHz
+tCH(4) tCLH Clock High Time 9 ns
+tCL(3) tCLL Clock Low Time 9 ns
+tCLCH(5) Clock Rise Time(6) (peak to peak) 0.1 V/ns
+tCHCL(5) Clock Fall Time(6) (peak to peak) 0.1 V/ns
+tSLCH tCSS S Active Setup Time (relative to C) 5 ns
+tCHSL S Not Active Hold Time (relative to C) 5 ns
+tDVCH tDSU Data In Setup Time 2 ns
+tCHDX tDH Data In Hold Time 5 ns
+tCHSH S Active Hold Time (relative to C) 5 ns
+tSHCH S Not Active Setup Time (relative to C) 5 ns
+tSHSL tCSH S Deselect Time 100 ns
+tSHQZ(5) tDIS Output Disable Time 8 ns
+tCLQV tV Clock Low to Output Valid 8 ns
+tCLQX tHO Output Hold Time 0 ns
+tHLCH HOLD Setup Time (relative to C) 5 ns
+tCHHH HOLD Hold Time (relative to C) 5 ns
+tHHCH HOLD Setup Time (relative to C) 5 ns
+tCHHL HOLD Hold Time (relative to C) 5 ns
+tHHQX(5) tLZ HOLD to Output Low-Z 8 ns
+tHLQZ(5) tHZ HOLD to Output High-Z 8 ns
+tWHSL(7) Write Protect Setup Time 20 ns
+tSHWL(7) Write Protect Hold Time 100 ns
+tDP(5) S High to Deep Power-down Mode 3 µs
+tRES1(5) S High to Standby Mode without Electronic
+Signature Read 30 µs
+tRES2(5) S High to Standby Mode with Electronic
+Signature Read 30 µs
+tW Write Status Register Cycle Time 1.3 15 ms
+DC and AC parameters M25P16
+42/55
+tPP (8)
+Page Program cycle time (256 Bytes) 0.64
+5 ms
+Page Program cycle time (n Bytes, where n = 1
+to 4) 0.01
+Page Program cycle time (n Bytes, where n = 5
+to 256) int(n/8) × 0.02(9)
+tSE Sector erase cycle Time 0.6 3 s
+tBE Bulk erase cycle Time 13 40 s
+1. Preliminary data.
+2. Details of how to find the Technology Process in the marking are given in AN1995, see also Section 12:
+Part numbering.
+3. Typical values given for TA = 25°C.
+4. tCH + tCL must be greater than or equal to 1/ fC
+5. Value guaranteed by characterization, not 100% tested in production.
+6. Expressed as a slew-rate.
+7. Only applicable as a constraint for a WRSR instruction when SRWD is set at 1.
+8. When using the Page Program (PP) instruction to program consecutive Bytes, optimized timings are
+obtained with one sequence including all the Bytes versus several sequences of only a few Bytes. (1 ≤ n ≤
+256)
+9. int(A) corresponds to the upper integer part of A. E.g. int(12/8) = 2, int(32/8) = 4 int(15.3) =16.
+Table 16. AC characteristics (Grade 6, T9HX (0.11µm) technology)
+(1) (continued)
+Applies only to products made with T9HX (0.11µm) Technology, identified with Process digit
+“4”(2)
+Test conditions specified in Table 10 and Table 12
+Symbol Alt. Parameter Min. Typ.(3) Max. Unit
+M25P16 DC and AC parameters
+ 43/55
+
+Table 17. AC characteristics (25 MHz operation, Grade 3)(1)
+Test conditions specified in Table 10 and Table 12
+Symbol Alt. Parameter Min. Typ. Max. Unit
+fC fC
+Clock Frequency for the following instructions:
+FAST_READ, PP, SE, BE, DP, RES, WREN,
+WRDI, RDSR, WRSR
+D.C. 25 MHz
+fR Clock Frequency for READ instructions D.C. 20 MHz
+tCH(2) tCLH Clock High Time 18 ns
+tCL(2) tCLL Clock Low Time 18 ns
+tCLCH(3) Clock Rise Time(4) (peak to peak) 0.1 V/ns
+tCHCL(3) Clock Fall Time(4) (peak to peak) 0.1 V/ns
+tSLCH tCSS S Active Setup Time (relative to C) 10 ns
+tCHSL S Not Active Hold Time (relative to C) 10 ns
+tDVCH tDSU Data In Setup Time 5 ns
+tCHDX tDH Data In Hold Time 5 ns
+tCHSH S Active Hold Time (relative to C) 10 ns
+tSHCH S Not Active Setup Time (relative to C) 10 ns
+tSHSL tCSH S Deselect Time 100 ns
+tSHQZ(3) tDIS Output Disable Time 15 ns
+tCLQV tV Clock Low to Output Valid 15 ns
+tCLQX tHO Output Hold Time 0 ns
+tHLCH HOLD Setup Time (relative to C) 10 ns
+tCHHH HOLD Hold Time (relative to C) 10 ns
+tHHCH HOLD Setup Time (relative to C) 10 ns
+tCHHL HOLD Hold Time (relative to C) 10 ns
+tHHQX(3) tLZ HOLD to Output Low-Z 15 ns
+tHLQZ(3) tHZ HOLD to Output High-Z 20 ns
+tWHSL(5) Write Protect Setup Time 20 ns
+tSHWL(5) Write Protect Hold Time 100 ns
+tDP(3) S High to Deep Power-down Mode 3 µs
+tRES1(3) S High to Standby Mode without Electronic
+Signature Read 3 µs
+tRES2(3) S High to Standby Mode with Electronic
+Signature Read 1.8 µs
+tW(6) Write Status Register cycle time 1.5 15 ms
+tPP(6) Page Program cycle time (256 bytes) 0.8
+5 ms
+Page Program cycle time (n bytes) int(n/8) × 0.025(7)
+DC and AC parameters M25P16
+44/55
+Figure 23. Serial input timing
+tSE(6) Sector Erase cycle time 0.8 3 s
+tBE(6) Bulk Erase cycle time 17 40 s
+1. Preliminary data.
+2. tCH + tCL must be greater than or equal to 1/ fC
+3. Value guaranteed by characterization, not 100% tested in production.
+4. Expressed as a slew-rate.
+5. Only applicable as a constraint for a WRSR instruction when SRWD is set at 1.
+6. Typical values given for TA = 85 °C.
+7. int(A) corresponds to the upper integer part of A. E.g. int(12/8) = 2, int(32/8) = 4 int(15.3) =16.
+Table 17. AC characteristics (25 MHz operation, Grade 3)(1) (continued)
+Test conditions specified in Table 10 and Table 12
+Symbol Alt. Parameter Min. Typ. Max. Unit
+C
+D
+AI01447C
+S
+MSB IN
+Q
+tDVCH
+High Impedance
+LSB IN
+tSLCH
+tCHDX
+tCHCL
+tCLCH
+tSHCH
+tSHSL
+tCHSL tCHSH
+M25P16 DC and AC parameters
+ 45/55
+Figure 24. Write Protect setup and hold timing during WRSR when SRWD = 1
+Figure 25. Hold timing
+C
+D
+S
+Q
+High Impedance
+W
+tWHSL
+tSHWL
+AI07439
+C
+Q
+AI02032
+S
+D
+HOLD
+tCHHL
+tHLCH
+tHHCH
+tCHHH
+tHLQZ tHHQX
+DC and AC parameters M25P16
+46/55
+Figure 26. Output timing
+C
+Q
+AI01449e
+S
+LSB OUT
+D ADDR.LSB IN
+tSHQZ
+tCH
+tCL
+tQLQH
+tQHQL
+tCLQX
+tCLQV
+tCLQX
+tCLQV
+M25P16 Package mechanical
+ 47/55
+11 Package mechanical
+Figure 27. VFQFPN8 (MLP8) 8-lead Very thin Fine Pitch Quad Flat Package No lead,
+6 × 5 mm, package outline
+1. Drawing is not to scale.
+2. The circle in the top view of the package indicates the position of pin 1.
+
+Table 18. VFQFPN8 (MLP8) 8-lead Very thin Fine Pitch Quad Flat Package No lead,
+6 × 5 mm, package mechanical data
+Symbol
+millimeters inches
+Typ Min Max Typ Min Max
+A 0.85 0.80 1.00 0.0335 0.0315 0.0394
+A1 0.00 0.05 0.0000 0.0020
+A2 0.65 0.0256
+A3 0.20 0.0079
+b 0.40 0.35 0.48 0.0157 0.0138 0.0189
+D 6.00 0.2362
+D1 5.75 0.2264
+D2 3.40 3.20 3.60 0.1339 0.1260 0.1417
+E 5.00 0.1969
+E1 4.75 0.1870
+E2 4.00 3.80 4.30 0.1575 0.1496 0.1693
+e 1.27 – – 0.0500 – –
+R1 0.10 0.00 0.0039 0.0000
+L 0.60 0.50 0.75 0.0236 0.0197 0.0295
+Θ 12° 12°
+aaa 0.15 0.0059
+bbb 0.10 0.0039
+ddd 0.05 0.0020
+D
+E
+70-ME
+A2
+A A1 A3
+E1
+D1
+E2 e
+D2
+L
+b
+θ
+R1
+ddd
+bbb
+C
+CAB
+A aaa CA
+B
+aaa CB
+M
+0.10 CA
+0.10 CB
+2x
+Package mechanical M25P16
+48/55
+Figure 28. VDFPN8 (MLP8) 8-lead Very thin Dual Flat Package No lead, 8 × 6mm,
+package outline
+1. Drawing is not to scale.
+2. The circle in the top view of the package indicates the position of pin 1.
+
+Table 19. VDFPN8 (MLP8) 8-lead Very thin Dual Flat Package No lead, 8 × 6mm,
+package mechanical data
+Symbol
+millimeters inches
+Typ Min Max Typ Min Max
+A 0.85 1.00 0.0335 0.0394
+A1 0.00 0.05 0.0000 0.0020
+b 0.40 0.35 0.48 0.0157 0.0138 0.0189
+D 8.00 0.3150
+D2 5.16 (1)
+1. D2 Max should not exceed (D – K – 2 × L).
+0.2031
+ddd 0.05 0.0020
+E 6.00 0.2362
+E2 4.80 0.1890
+e 1.27 – – 0.0500 – –
+K 0.82 0.0323
+L 0.50 0.45 0.60 0.0197 0.0177 0.0236
+L1 0.15 0.0059
+N8 8
+D
+E
+VDFPN-02
+A
+E2 e
+D2
+L
+b
+L1
+A1
+ddd
+K
+M25P16 Package mechanical
+ 49/55
+Figure 29. SO8N – 8 lead Plastic Small Outline, 150 mils body width, package outline
+1. Drawing is not to scale.
+
+Table 20. SO8N – 8 lead Plastic Small Outline, 150 mils body width, package
+mechanical data
+Symbol
+millimeters inches
+Typ Min Max Typ Min Max
+A 1.75 0.069
+A1 0.10 0.25 0.004 0.010
+A2 1.25 0.049
+b 0.28 0.48 0.011 0.019
+c 0.17 0.23 0.007 0.009
+ccc 0.10 0.004
+D 4.90 4.80 5.00 0.193 0.189 0.197
+E 6.00 5.80 6.20 0.236 0.228 0.244
+E1 3.90 3.80 4.00 0.154 0.150 0.157
+e 1.27 – – 0.050 – –
+h 0.25 0.50 0.010 0.020
+k 0° 8° 0° 8°
+L 0.40 1.27 0.016 0.050
+L1 1.04 0.041
+SO-A
+E1
+8
+ccc b
+e
+A
+D
+c
+1
+E
+h x 45˚
+A2
+k
+0.25 mm
+L
+L1
+A1
+GAUGE PLANE
+Package mechanical M25P16
+50/55
+Figure 30. SO8W – 8 lead Plastic Small Outline, 208 mils body width, package
+outline
+1. Drawing is not to scale.
+
+Table 21. SO8 wide – 8 lead Plastic Small Outline, 208 mils body width,
+package mechanical data
+Symbol
+millimeters inches
+Typ Min Max Typ Min Max
+A 2.50 0.098
+A1 0.00 0.25 0.000 0.010
+A2 1.51 2.00 0.059 0.079
+b 0.40 0.35 0.51 0.016 0.014 0.020
+c 0.20 0.10 0.35 0.008 0.004 0.014
+CP 0.10 0.004
+D 6.05 0.238
+E 5.02 6.22 0.198 0.245
+E1 7.62 8.89 0.300 0.350
+e 1.27 – – 0.050 – –
+k 0° 10° 0° 10°
+L 0.50 0.80 0.020 0.031
+N8 8
+6L_ME
+E
+N
+CP
+b
+e
+A2
+D
+c
+A1 k L
+E1
+A
+1
+M25P16 Package mechanical
+ 51/55
+Figure 31. SO16 wide – 16-lead Plastic Small Outline, 300 mils body width, package
+outline
+1. Drawing is not to scale.
+
+Table 22. SO16 wide – 16-lead Plastic Small Outline, 300 mils body width,
+mechanical data
+Symbol
+millimeters inches
+Typ. Min. Max. Typ. Min. Max.
+A 2.35 2.65 0.093 0.104
+A1 0.10 0.30 0.004 0.012
+B 0.33 0.51 0.013 0.020
+C 0.23 0.32 0.009 0.013
+D 10.10 10.50 0.398 0.413
+E 7.40 7.60 0.291 0.299
+e 1.27 – – 0.050 – –
+H 10.00 10.65 0.394 0.419
+h 0.25 0.75 0.010 0.030
+L 0.40 1.27 0.016 0.050
+θ 0° 8° 0° 8°
+ddd 0.10 0.004
+E
+16
+D
+C
+H
+1 8
+9
+SO-H
+A A1 L
+ddd
+A2
+θ
+B e
+h x 45˚
+Part numbering M25P16
+52/55
+12 Part numbering
+
+Note: For a list of available options (speed, package, etc.), for further information on any aspect of
+this device or when ordering parts operating at 50MHz (0.11µm, process digit “4”), please
+contact your nearest ST Sales Office.
+The category of second Level Interconnect is marked on the package and on the inner box
+label, in compliance with JEDEC Standard JESD97. The maximum ratings related to
+soldering conditions are also marked on the inner box label.
+Table 23. Ordering information scheme
+Example: M25P16 – V ME 6 T P
+Device Type
+M25P = Serial Flash Memory for Code Storage
+Device Function
+16 = 16 Mbit (2 Mb × 8)
+Operating Voltage
+V = VCC = 2.7 V to 3.6 V
+Package
+MP = VFQFPN8 6 × 5 mm (MLP8)
+ME = VDFPN8 8 × 6 mm (MLP8)(1)
+1. Not for New Design, please use VFQFPN8 6 × 5 mm.
+MF = SO16 (300 mils width)
+MN = SO8N (150 mils width)
+MW = SO8W (208 mils width)
+Device Grade
+6 = Industrial temperature range, –40 to 85 °C.
+Device tested with standard test flow
+3(2) = Automotive temperature range, –40 to 125 °C.
+Device tested with High Reliability Certified Flow.
+2. Grade 3 is available only in devices delivered in SO8N packages.
+Option
+blank = Standard Packing
+T = Tape and Reel Packing
+Plating Technology
+P or G = ECOPACK® (RoHS compliant)
+M25P16 Revision history
+ 53/55
+13 Revision history
+
+Table 24. Document revision history
+Date Revision Changes
+16-Jan-2002 0.1 Target Specification Document written
+23-Apr-2002 0.4
+Clarification of descriptions of entering Stand-by Power mode from Deep
+Power-down mode, and of terminating an instruction sequence or dataout sequence.
+ICC2(max) value changed to 10µA
+13-Dec-2002 0.5
+Typical Page Program time improved. Write Protect setup and hold times
+specified, for applications that switch Write Protect to exit the Hardware
+Protection mode immediately before a WRSR, and to enter the Hardware
+Protection mode again immediately after
+15-May-2003
+0.6 MLP8 package added
+0.7 50MHz operation, and RDID instruction added. Published internally, only
+20-Jun-2003 0.8 8x6 MLP8 and SO16(300 mil) packages added
+24-Sep-2003 1.0 tPP, tSE and tBE revised. SO16 package code changed. Output Timing
+Reference Voltage changed. Document promoted to Preliminary Data.
+24-Nov-2003 2.0
+Table of contents, warning about exposed paddle on MLP8, and Pb-free
+options added.
+Value of tVSL(min) and tBE(typ) changed. Change of naming for VDFPN8
+packages. Document promoted to full Datasheet.
+17-May-2004 3.0 MLP8(5x6) package removed. Soldering temperature information
+clarified for RoHS compliant devices. Device Grade clarified
+01-Apr-2005 4.0
+Notes 1 and 2 removed from Table 23: Ordering information scheme.
+Small text changes.
+Read Identification (RDID), Deep Power-down (DP) and Release from
+Deep Power-down and Read Electronic Signature (RES) instructions,
+and Active Power, Stand-by Power and Deep Power-Down modes
+paragraph clarified.
+01-Aug-2005 5.0 Updated Page Program (PP) instructions in Page programming, Page
+Program (PP) and Table 15: AC characteristics (Grade 6).
+20-Oct-2005 6.0
+VFQFPN8 package added (see Figure 27: VFQFPN8 (MLP8) 8-lead Very
+thin Fine Pitch Quad Flat Package No lead, 6 × 5 mm, package outline
+and Table 18: VFQFPN8 (MLP8) 8-lead Very thin Fine Pitch Quad Flat
+Package No lead, 6 × 5 mm, package mechanical data).
+All packages are ECOPACK®. “Blank” option removed under Plating
+Technology.
+27-Feb-2006 7
+SO8 Narrow and SO8 Wide packages added (see Section 11: Package
+mechanical). VDFPN8 package updated (see Table 19: VDFPN8 (MLP8)
+8-lead Very thin Dual Flat Package No lead, 8 × 6mm, package
+mechanical data). Note 1 added to Table 23: Ordering information
+scheme.
+04-Jul-2006 8
+Figure 4: Bus master and memory devices on the SPI bus updated and
+Note 2 added. SO8N package specifications updated (see Figure 29 and
+Table 20). Small text changes.
+Revision history M25P16
+54/55
+10-Oct-2006 9
+Page Program, Sector Erase and Bulk Erase updated in Features.
+VIO max modified in Table 9: Absolute maximum ratings.
+Table 16: AC characteristics (Grade 6, T9HX (0.11µm) technology)
+added.
+VFQFPN8 package specifications updated (see Table 18). Note 1 added
+to Table 19. Note: on page 52 modified.
+09-Jan-2006 10
+Small text changes. Hardware Write protection added to Features.
+VCC supply voltage and VSS ground signal descriptions added. Figure 4:
+Bus master and memory devices on the SPI bus modified, note 2
+removed and replaced by an explanatory paragraph. Write In Progress bit
+behavior specified at Power-up (see Section 7: Power-up and Powerdown). TLEAD added to Table 9: Absolute maximum ratings. Grade 3
+temperature range added.
+Table 11: Data retention and endurance and Table 17: AC characteristics
+(25 MHz operation, Grade 3) added.
+SO8W and VFQFPN8 package specifications updated (see Section 11:
+Package mechanical).
+Table 24. Document revision history (continued)
+Date Revision Changes
+M25P16
+ 55/55
+
+Please Read Carefully:
+Information in this document is provided solely in connection with ST products. STMicroelectronics NV and its subsidiaries (“ST”) reserve the
+right to make changes, corrections, modifications or improvements, to this document, and the products and services described herein at any
+time, without notice.
+All ST products are sold pursuant to ST’s terms and conditions of sale.
+Purchasers are solely responsible for the choice, selection and use of the ST products and services described herein, and ST assumes no
+liability whatsoever relating to the choice, selection or use of the ST products and services described herein.
+No license, express or implied, by estoppel or otherwise, to any intellectual property rights is granted under this document. If any part of this
+document refers to any third party products or services it shall not be deemed a license grant by ST for the use of such third party products
+or services, or any intellectual property contained therein or considered as a warranty covering the use in any manner whatsoever of such
+third party products or services or any intellectual property contained therein.
+UNLESS OTHERWISE SET FORTH IN ST’S TERMS AND CONDITIONS OF SALE ST DISCLAIMS ANY EXPRESS OR IMPLIED
+WARRANTY WITH RESPECT TO THE USE AND/OR SALE OF ST PRODUCTS INCLUDING WITHOUT LIMITATION IMPLIED
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE (AND THEIR EQUIVALENTS UNDER THE LAWS
+OF ANY JURISDICTION), OR INFRINGEMENT OF ANY PATENT, COPYRIGHT OR OTHER INTELLECTUAL PROPERTY RIGHT.
+UNLESS EXPRESSLY APPROVED IN WRITING BY AN AUTHORIZED ST REPRESENTATIVE, ST PRODUCTS ARE NOT
+RECOMMENDED, AUTHORIZED OR WARRANTED FOR USE IN MILITARY, AIR CRAFT, SPACE, LIFE SAVING, OR LIFE SUSTAINING
+APPLICATIONS, NOR IN PRODUCTS OR SYSTEMS WHERE FAILURE OR MALFUNCTION MAY RESULT IN PERSONAL INJURY,
+DEATH, OR SEVERE PROPERTY OR ENVIRONMENTAL DAMAGE. ST PRODUCTS WHICH ARE NOT SPECIFIED AS "AUTOMOTIVE
+GRADE" MAY ONLY BE USED IN AUTOMOTIVE APPLICATIONS AT USER’S OWN RISK.
+Resale of ST products with provisions different from the statements and/or technical features set forth in this document shall immediately void
+any warranty granted by ST for the ST product or service described herein and shall not create or extend in any manner whatsoever, any
+liability of ST.
+ST and the ST logo are trademarks or registered trademarks of ST in various countries.
+Information in this document supersedes and replaces all information previously supplied.
+The ST logo is a registered trademark of STMicroelectronics. All other names are the property of their respective owners.
+© 2007 STMicroelectronics - All rights reserved
+STMicroelectronics group of companies
+Australia - Belgium - Brazil - Canada - China - Czech Republic - Finland - France - Germany - Hong Kong - India - Israel - Italy - Japan -
+Malaysia - Malta - Morocco - Singapore - Spain - Sweden - Switzerland - United Kingdom - United States of America
+www.st.com

@@ -21,7 +21,7 @@ entity spi_flash_id is
 end entity spi_flash_id;
 
 architecture rtl of spi_flash_id is
-  type state_t is (S_IDLE, S_START, S_CLOCK, S_DONE);
+  type state_t is (S_IDLE, S_WAKEUP, S_WAKE_CLOCK, S_WAKE_DONE, S_PAUSE, S_START, S_CLOCK, S_DONE);
   signal state    : state_t := S_IDLE;
   signal bit_cnt  : integer range 0 to 31 := 0;
   signal clk_div  : unsigned(3 downto 0) := (others => '0');
@@ -71,7 +71,50 @@ begin
             spi_ss_b <= '1';
             sck_int <= '0';
             if read_ok = '0' then
+              state <= S_WAKEUP;
+            end if;
+
+          -- Release from Deep Power-down: send 0xAB
+          when S_WAKEUP =>
+            spi_ss_b <= '0';
+            sck_int <= '0';
+            shift_tx <= x"AB000000";
+            bit_cnt <= 7;  -- only need 8 bits for wakeup
+            clk_div <= (others => '0');
+            state <= S_WAKE_CLOCK;
+
+          when S_WAKE_CLOCK =>
+            spi_ss_b <= '0';
+            clk_div <= clk_div + 1;
+            if clk_div = 7 then
+              sck_int <= '1';
+            elsif clk_div = 15 then
+              sck_int <= '0';
+              shift_tx <= shift_tx(30 downto 0) & '0';
+              if bit_cnt = 0 then
+                state <= S_WAKE_DONE;
+              else
+                bit_cnt <= bit_cnt - 1;
+              end if;
+              clk_div <= (others => '0');
+            end if;
+
+          when S_WAKE_DONE =>
+            spi_ss_b <= '1';
+            sck_int <= '0';
+            clk_div <= (others => '0');
+            bit_cnt <= 0;
+            state <= S_PAUSE;
+
+          -- Wait tRES1 (30 us max) before RDID
+          when S_PAUSE =>
+            spi_ss_b <= '1';
+            sck_int <= '0';
+            if bit_cnt = 2000 then  -- 40 us @ 50 MHz
+              bit_cnt <= 0;
               state <= S_START;
+            else
+              bit_cnt <= bit_cnt + 1;
             end if;
 
           when S_START =>
@@ -88,11 +131,14 @@ begin
             clk_div <= clk_div + 1;
 
             if clk_div = 7 then
-              -- Falling edge: sample MISO (Flash outputs on falling edge)
-              sck_int <= '0';
+              -- Rising edge: sample MISO
+              sck_int <= '1';
               if bit_cnt < 24 then
                 shift_rx <= shift_rx(22 downto 0) & spi_miso;
               end if;
+            elsif clk_div = 15 then
+              -- Falling edge: shift MOSI
+              sck_int <= '0';
               shift_tx <= shift_tx(30 downto 0) & '0';
               if bit_cnt = 0 then
                 state <= S_DONE;
@@ -100,9 +146,6 @@ begin
                 bit_cnt <= bit_cnt - 1;
               end if;
               clk_div <= (others => '0');
-            elsif clk_div = 3 then
-              -- Rising edge
-              sck_int <= '1';
             end if;
 
           when S_DONE =>
