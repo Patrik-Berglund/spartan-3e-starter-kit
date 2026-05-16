@@ -60,6 +60,7 @@ build/top.xst, build/top.prj
 - Keep designs simple and self-contained — no IP cores or external dependencies
 - Each mode is a self-contained entity with `enable` input
 - Shared peripherals (SPI, LCD) are muxed in top.vhd
+- Commit and push after every meaningful change — don't batch up work
 
 ## XST / VHDL-93 Gotchas (Learned)
 
