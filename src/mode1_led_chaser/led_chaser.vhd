@@ -1,0 +1,127 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity led_chaser is
+  port (
+    clk       : in  std_logic;
+    rst       : in  std_logic;
+    enable    : in  std_logic;
+    sw        : in  std_logic_vector(3 downto 0);
+    rot_event : in  std_logic;
+    rot_dir   : in  std_logic;
+    led       : out std_logic_vector(7 downto 0);
+    lcd_line2 : out std_logic_vector(127 downto 0)
+  );
+end entity led_chaser;
+
+architecture rtl of led_chaser is
+  signal prescale  : unsigned(24 downto 0) := (others => '0');
+  signal speed     : unsigned(3 downto 0) := "0100";
+  signal pattern   : std_logic_vector(7 downto 0) := "00000001";
+  signal tick      : std_logic := '0';
+  signal direction : std_logic := '1';  -- 1=left, 0=right
+
+  function char_to_slv(c : character) return std_logic_vector is
+  begin
+    return std_logic_vector(to_unsigned(character'pos(c), 8));
+  end function;
+begin
+
+  -- Speed control via rotary
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      if rst = '1' then
+        speed <= "0100";
+      elsif enable = '1' and rot_event = '1' then
+        if rot_dir = '1' and speed < 15 then
+          speed <= speed + 1;
+        elsif rot_dir = '0' and speed > 0 then
+          speed <= speed - 1;
+        end if;
+      end if;
+    end if;
+  end process;
+
+  -- Prescaler
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      tick <= '0';
+      if rst = '1' or enable = '0' then
+        prescale <= (others => '0');
+      else
+        if prescale = unsigned(shift_left(to_unsigned(1, 25), to_integer(speed) + 16)) then
+          prescale <= (others => '0');
+          tick <= '1';
+        else
+          prescale <= prescale + 1;
+        end if;
+      end if;
+    end if;
+  end process;
+
+  -- Pattern shift
+  process(clk)
+  begin
+    if rising_edge(clk) then
+      if rst = '1' or enable = '0' then
+        pattern <= "00000001";
+        direction <= '1';
+      else
+        -- Direction from SW(0)
+        direction <= sw(0);
+
+        if tick = '1' then
+          case sw(3 downto 1) is
+            when "000" =>  -- single LED bounce
+              if direction = '1' then
+                pattern <= pattern(6 downto 0) & '0';
+                if pattern(6) = '1' then direction <= '0'; end if;
+              else
+                pattern <= '0' & pattern(7 downto 1);
+                if pattern(1) = '1' then direction <= '1'; end if;
+              end if;
+            when "001" =>  -- knight rider
+              if direction = '1' then
+                pattern <= pattern(6 downto 0) & '0';
+                if pattern(6) = '1' then direction <= '0'; end if;
+              else
+                pattern <= '0' & pattern(7 downto 1);
+                if pattern(1) = '1' then direction <= '1'; end if;
+              end if;
+            when "010" =>  -- rotate left
+              pattern <= pattern(6 downto 0) & pattern(7);
+            when "011" =>  -- rotate right
+              pattern <= pattern(0) & pattern(7 downto 1);
+            when "100" =>  -- fill left
+              pattern <= pattern(6 downto 0) & '1';
+            when others =>  -- blink all
+              pattern <= not pattern;
+          end case;
+        end if;
+      end if;
+    end if;
+  end process;
+
+  led <= pattern when enable = '1' else (others => '0');
+
+  -- LCD line 2: "Spd:X  Pat:X    "
+  process(speed, sw)
+    variable s_val, p_val : unsigned(7 downto 0);
+  begin
+    s_val := to_unsigned(48 + to_integer(speed), 8);
+    if speed > 9 then
+      s_val := to_unsigned(55 + to_integer(speed), 8);  -- A-F
+    end if;
+    p_val := to_unsigned(48 + to_integer(unsigned(sw(3 downto 1))), 8);
+    lcd_line2 <=
+      char_to_slv('S') & char_to_slv('p') & char_to_slv('d') & char_to_slv(':') &
+      std_logic_vector(s_val) & char_to_slv(' ') &
+      char_to_slv(' ') & char_to_slv('P') & char_to_slv('a') & char_to_slv('t') & char_to_slv(':') &
+      std_logic_vector(p_val) &
+      char_to_slv(' ') & char_to_slv(' ') & char_to_slv(' ') & char_to_slv(' ');
+  end process;
+
+end architecture rtl;

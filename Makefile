@@ -4,6 +4,8 @@ PART    := xc3s500e-fg320-4
 UCF     := ../constraints/top.ucf
 BUILDDIR := build
 
+VHDL_SRC := $(wildcard src/**/*.vhd) $(wildcard src/*.vhd)
+
 .PHONY: all clean program
 
 all: $(BUILDDIR)/$(DESIGN).bit
@@ -12,7 +14,7 @@ $(BUILDDIR)/xst/tmp:
 	mkdir -p $@
 
 # Synthesis
-$(BUILDDIR)/$(DESIGN).ngc: src/top.vhd $(BUILDDIR)/top.xst $(BUILDDIR)/top.prj | $(BUILDDIR)/xst/tmp
+$(BUILDDIR)/$(DESIGN).ngc: $(VHDL_SRC) $(BUILDDIR)/top.xst $(BUILDDIR)/top.prj | $(BUILDDIR)/xst/tmp
 	cd $(BUILDDIR) && xst -ifn top.xst -ofn top.syr
 
 # Translate

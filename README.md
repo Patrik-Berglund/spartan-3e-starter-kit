@@ -2,7 +2,16 @@
 
 ![Spartan-3E Starter Kit Board](docs/board.jpg)
 
-LED blinker demo for the Xilinx Spartan-3E Starter Kit (XC3S500E-FG320-4).
+Board Explorer demo for the Xilinx Spartan-3E Starter Kit (XC3S500E-FG320-4).
+Press the rotary encoder to cycle through 9 demo modes exercising every board peripheral.
+
+## Design
+
+- `src/top.vhd` — top-level: mode mux, output routing, shared infrastructure
+- `src/infrastructure/` — debounce, rotary decoder, SPI master, LCD controller, mode mux
+- `src/mode1_led_chaser/` through `src/mode9_ethernet_ping/` — one module per peripheral
+- `constraints/top.ucf` — all pin assignments
+- `build/top.xst`, `build/top.prj` — synthesis scripts
 
 ## Board Specifications
 
@@ -138,7 +147,8 @@ sudo xc3sprog -c xpc -p 0 build/top.bit
 
 ## Design
 
-- `src/top.vhd` — 32-bit counter, upper bits drive 8 LEDs at visible rates
-- `constraints/top.ucf` — pin assignments for 50 MHz clock and LEDs
-- `build/top.xst` — XST synthesis script
-- `build/top.prj` — XST project file
+- `src/top.vhd` — top-level: mode mux, output routing, shared infrastructure
+- `src/infrastructure/` — debounce, rotary decoder, SPI master, LCD controller, mode mux
+- `src/mode1_led_chaser/` through `src/mode9_ethernet_ping/` — one module per peripheral
+- `constraints/top.ucf` — all pin assignments
+- `build/top.xst`, `build/top.prj` — synthesis scripts
