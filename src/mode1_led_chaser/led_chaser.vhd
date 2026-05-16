@@ -86,7 +86,7 @@ begin
       else
         if tick = '1' then
           case sw(3 downto 1) is
-            when "000" | "001" =>  -- bounce / knight rider
+            when "000" =>  -- single LED bounce
               if direction = '1' then
                 pattern <= pattern(6 downto 0) & '0';
                 if pattern(6) = '1' then
@@ -98,6 +98,8 @@ begin
                   direction <= '1';
                 end if;
               end if;
+            when "001" =>  -- all LEDs blink alternating
+              pattern <= not pattern;
             when "010" =>  -- rotate left
               pattern <= pattern(6 downto 0) & pattern(7);
             when "011" =>  -- rotate right
