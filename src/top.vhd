@@ -19,6 +19,7 @@ entity top is
     lcd_rw       : out   std_logic;
     sf_d         : out   std_logic_vector(11 downto 8);
     sf_ce0       : out   std_logic;
+    sf_oe        : out   std_logic;
     spi_mosi     : out   std_logic;
     spi_miso     : in    std_logic;
     spi_sck      : out   std_logic;
@@ -130,6 +131,7 @@ begin
 
   rst <= btn_south;
   sf_ce0 <= '1';  -- disable StrataFlash, free LCD bus
+  sf_oe  <= '1';  -- disable StrataFlash output (shares SPI_MISO)
   fpga_init_b <= '1';  -- disable Platform Flash on SPI_MISO
   dac_clr <= '1'; -- DAC not in reset
   sf_d <= lcd_db;

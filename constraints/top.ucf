@@ -41,6 +41,7 @@ NET "sf_d<9>"   LOC = "R16" | IOSTANDARD = LVCMOS33 | DRIVE = 4 | SLEW = SLOW ;
 NET "sf_d<10>"  LOC = "P17" | IOSTANDARD = LVCMOS33 | DRIVE = 4 | SLEW = SLOW ;
 NET "sf_d<11>"  LOC = "M15" | IOSTANDARD = LVCMOS33 | DRIVE = 4 | SLEW = SLOW ;
 NET "sf_ce0"    LOC = "D16" | IOSTANDARD = LVCMOS33 | DRIVE = 4 | SLEW = SLOW ;
+NET "sf_oe"     LOC = "C18" | IOSTANDARD = LVCMOS33 | DRIVE = 4 | SLEW = SLOW ;
 
 # ==== SPI Bus ====
 NET "spi_miso"  LOC = "N10" | IOSTANDARD = LVCMOS33 ;
