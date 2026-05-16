@@ -78,13 +78,20 @@ begin
 
   -- Pattern shift
   process(clk)
+    variable sw_prev : std_logic_vector(3 downto 1) := "000";
   begin
     if rising_edge(clk) then
       if rst = '1' or enable = '0' then
         pattern <= "00000001";
         direction <= '1';
+        sw_prev := "000";
       else
-        if tick = '1' then
+        -- Reset pattern when switches change
+        if sw(3 downto 1) /= sw_prev then
+          pattern <= "00000001";
+          direction <= '1';
+          sw_prev := sw(3 downto 1);
+        elsif tick = '1' then
           case sw(3 downto 1) is
             when "000" =>  -- single LED bounce
               if direction = '1' then
