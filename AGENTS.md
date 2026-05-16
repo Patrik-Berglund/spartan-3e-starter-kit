@@ -55,3 +55,4 @@ These cause synthesis errors in ISE 14.7 XST:
 4. **LCD init is timing-critical** — The HD44780 power-on sequence must be followed exactly (3× write 0x3, then 0x2, with specific delays). A sequential state machine with explicit waits is the only reliable approach.
 5. **Pattern state machines need reset on mode/config change** — If the user changes a setting (switch, button), reset the pattern state to avoid stuck/invisible states.
 6. **Board reprograms from scratch** — After `xc3sprog`, the FPGA restarts. Use switches for mode select so you land on the right demo immediately without navigation.
+7. **Always debounce buttons** — Physical buttons bounce for ~2 ms. Always debounce AND edge-detect before using in logic. Without edge detection, a held button triggers every clock cycle.
