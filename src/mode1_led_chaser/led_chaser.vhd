@@ -48,22 +48,29 @@ begin
     end if;
   end process;
 
-  -- Pattern select via buttons
+  -- Pattern select via buttons (edge-detected)
   process(clk)
+    variable east_prev : std_logic := '0';
+    variable west_prev : std_logic := '0';
   begin
     if rising_edge(clk) then
       if rst = '1' then
         pat_sel <= "000";
+        east_prev := '0';
+        west_prev := '0';
       elsif enable = '1' then
-        if btn_east = '1' then
+        if btn_east = '1' and east_prev = '0' then
           if pat_sel < 5 then
             pat_sel <= pat_sel + 1;
           end if;
-        elsif btn_west = '1' then
+        end if;
+        if btn_west = '1' and west_prev = '0' then
           if pat_sel > 0 then
             pat_sel <= pat_sel - 1;
           end if;
         end if;
+        east_prev := btn_east;
+        west_prev := btn_west;
       end if;
     end if;
   end process;

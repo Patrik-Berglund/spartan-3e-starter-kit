@@ -122,6 +122,7 @@ architecture rtl of top is
 
   -- Enable signals
   signal en : std_logic_vector(8 downto 0);
+  signal btn_deb : std_logic_vector(2 downto 0);
 begin
 
   rst <= btn_south;
@@ -135,6 +136,15 @@ begin
   end generate;
 
   -- ==================== Infrastructure ====================
+
+  -- Debounce buttons
+  u_deb_btn: entity work.debounce
+    generic map (G_WIDTH => 3, G_COUNT_MAX => 500000)
+    port map (
+      clk => clk_50mhz, rst => rst,
+      input(0) => btn_north, input(1) => btn_east, input(2) => btn_west,
+      output => btn_deb
+    );
 
   u_rotary: entity work.rotary_decoder
     port map (
@@ -180,7 +190,7 @@ begin
     port map (
       clk => clk_50mhz, rst => rst, enable => en(0),
       rot_event => rot_event, rot_dir => rot_dir, rot_press => rot_press,
-      btn_north => btn_north, btn_east => btn_east, btn_west => btn_west,
+      btn_north => btn_deb(0), btn_east => btn_deb(1), btn_west => btn_deb(2),
       led => led_mode1, lcd_line2 => lcd2_mode1
     );
 
