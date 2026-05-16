@@ -6,7 +6,7 @@ entity lcd_controller is
   port (
     clk    : in  std_logic;
     rst    : in  std_logic;
-    line1  : in  std_logic_vector(127 downto 0);  -- 16 chars, char0 = bits 127:120
+    line1  : in  std_logic_vector(127 downto 0);
     line2  : in  std_logic_vector(127 downto 0);
     update : in  std_logic;
     busy   : out std_logic;
@@ -18,235 +18,256 @@ entity lcd_controller is
 end entity lcd_controller;
 
 architecture rtl of lcd_controller is
-  -- Timing constants @ 50 MHz
-  constant C_15MS   : integer := 750000;
-  constant C_4_1MS  : integer := 205000;
-  constant C_100US  : integer := 5000;
-  constant C_40US   : integer := 2000;
-  constant C_1_64MS : integer := 82000;
-  constant C_ENABLE : integer := 12;  -- 240 ns pulse
-  constant C_1US    : integer := 50;
+  constant C_ENABLE : integer := 12;   -- 240 ns @ 50 MHz
 
-  type state_t is (
-    S_POWERON, S_INIT0, S_INIT1, S_INIT2, S_INIT3,
-    S_FUNC_SET, S_ENTRY_MODE, S_DISP_ON, S_CLEAR,
-    S_IDLE, S_WRITE_SETUP, S_WRITE_UPPER, S_WRITE_GAP, S_WRITE_LOWER, S_WRITE_WAIT,
-    S_SET_ADDR
-  );
-  signal state : state_t := S_POWERON;
+  -- Command sequence for init + refresh
+  -- Each entry: (rs, data_byte)
+  -- Init: 8 commands, then set addr line1 + 16 chars + set addr line2 + 16 chars = 42 total
+  constant SEQ_LEN : integer := 42;
 
-  signal wait_cnt  : integer range 0 to C_15MS := 0;
-  signal char_idx  : integer range 0 to 32 := 0;
-  signal cur_byte  : std_logic_vector(7 downto 0) := (others => '0');
-  signal is_data   : std_logic := '0';
-  signal line_buf  : std_logic_vector(255 downto 0) := (others => '0');
+  signal seq_idx   : integer range 0 to SEQ_LEN-1 := 0;
+  signal seq_byte  : std_logic_vector(7 downto 0);
+  signal seq_rs    : std_logic;
+
+  type state_t is (S_POWERON, S_INIT0, S_INIT1, S_INIT2, S_INIT3,
+                   S_IDLE, S_NIBBLE_HI, S_NIBBLE_HI_E, S_GAP,
+                   S_NIBBLE_LO, S_NIBBLE_LO_E, S_WAIT, S_NEXT);
+  signal state     : state_t := S_POWERON;
+  signal wait_cnt  : integer range 0 to 750000 := 0;
   signal pending   : std_logic := '0';
+  signal line1_buf : std_logic_vector(127 downto 0) := (others => '0');
+  signal line2_buf : std_logic_vector(127 downto 0) := (others => '0');
+
+  -- Wait times
+  constant C_15MS  : integer := 750000;
+  constant C_4_1MS : integer := 205000;
+  constant C_100US : integer := 5000;
+  constant C_40US  : integer := 2000;
+  constant C_1_64MS: integer := 82000;
+  constant C_1US   : integer := 50;
+
+  -- Current wait target
+  signal wait_target : integer range 0 to 750000 := 0;
 begin
 
-  lcd_rw <= '0';  -- always write
+  lcd_rw <= '0';
+
+  -- Determine current byte and RS based on seq_idx
+  process(seq_idx, line1_buf, line2_buf)
+  begin
+    case seq_idx is
+      -- Init commands (RS=0)
+      when 0 => seq_rs <= '0'; seq_byte <= x"28";  -- Function set
+      when 1 => seq_rs <= '0'; seq_byte <= x"06";  -- Entry mode
+      when 2 => seq_rs <= '0'; seq_byte <= x"0C";  -- Display on
+      when 3 => seq_rs <= '0'; seq_byte <= x"01";  -- Clear
+      -- Set DD RAM addr line 1
+      when 4 => seq_rs <= '0'; seq_byte <= x"80";
+      -- Line 1 chars (idx 5..20)
+      when 5  => seq_rs <= '1'; seq_byte <= line1_buf(127 downto 120);
+      when 6  => seq_rs <= '1'; seq_byte <= line1_buf(119 downto 112);
+      when 7  => seq_rs <= '1'; seq_byte <= line1_buf(111 downto 104);
+      when 8  => seq_rs <= '1'; seq_byte <= line1_buf(103 downto 96);
+      when 9  => seq_rs <= '1'; seq_byte <= line1_buf(95 downto 88);
+      when 10 => seq_rs <= '1'; seq_byte <= line1_buf(87 downto 80);
+      when 11 => seq_rs <= '1'; seq_byte <= line1_buf(79 downto 72);
+      when 12 => seq_rs <= '1'; seq_byte <= line1_buf(71 downto 64);
+      when 13 => seq_rs <= '1'; seq_byte <= line1_buf(63 downto 56);
+      when 14 => seq_rs <= '1'; seq_byte <= line1_buf(55 downto 48);
+      when 15 => seq_rs <= '1'; seq_byte <= line1_buf(47 downto 40);
+      when 16 => seq_rs <= '1'; seq_byte <= line1_buf(39 downto 32);
+      when 17 => seq_rs <= '1'; seq_byte <= line1_buf(31 downto 24);
+      when 18 => seq_rs <= '1'; seq_byte <= line1_buf(23 downto 16);
+      when 19 => seq_rs <= '1'; seq_byte <= line1_buf(15 downto 8);
+      when 20 => seq_rs <= '1'; seq_byte <= line1_buf(7 downto 0);
+      -- Set DD RAM addr line 2
+      when 21 => seq_rs <= '0'; seq_byte <= x"C0";
+      -- Line 2 chars (idx 22..37)
+      when 22 => seq_rs <= '1'; seq_byte <= line2_buf(127 downto 120);
+      when 23 => seq_rs <= '1'; seq_byte <= line2_buf(119 downto 112);
+      when 24 => seq_rs <= '1'; seq_byte <= line2_buf(111 downto 104);
+      when 25 => seq_rs <= '1'; seq_byte <= line2_buf(103 downto 96);
+      when 26 => seq_rs <= '1'; seq_byte <= line2_buf(95 downto 88);
+      when 27 => seq_rs <= '1'; seq_byte <= line2_buf(87 downto 80);
+      when 28 => seq_rs <= '1'; seq_byte <= line2_buf(79 downto 72);
+      when 29 => seq_rs <= '1'; seq_byte <= line2_buf(71 downto 64);
+      when 30 => seq_rs <= '1'; seq_byte <= line2_buf(63 downto 56);
+      when 31 => seq_rs <= '1'; seq_byte <= line2_buf(55 downto 48);
+      when 32 => seq_rs <= '1'; seq_byte <= line2_buf(47 downto 40);
+      when 33 => seq_rs <= '1'; seq_byte <= line2_buf(39 downto 32);
+      when 34 => seq_rs <= '1'; seq_byte <= line2_buf(31 downto 24);
+      when 35 => seq_rs <= '1'; seq_byte <= line2_buf(23 downto 16);
+      when 36 => seq_rs <= '1'; seq_byte <= line2_buf(15 downto 8);
+      when 37 => seq_rs <= '1'; seq_byte <= line2_buf(7 downto 0);
+      -- Padding (shouldn't reach here)
+      when others => seq_rs <= '0'; seq_byte <= x"00";
+    end case;
+  end process;
 
   process(clk)
-    variable byte_v : std_logic_vector(7 downto 0);
   begin
     if rising_edge(clk) then
       if rst = '1' then
         state    <= S_POWERON;
         wait_cnt <= 0;
-        char_idx <= 0;
+        seq_idx  <= 0;
         lcd_e    <= '0';
         lcd_rs   <= '0';
         lcd_db   <= "0000";
         pending  <= '0';
-        line_buf <= (others => '0');
       else
-        -- Latch update requests
         if update = '1' then
-          line_buf <= line1 & line2;
-          pending  <= '1';
+          line1_buf <= line1;
+          line2_buf <= line2;
+          pending   <= '1';
         end if;
 
         case state is
-          -- Power-on wait 15 ms
           when S_POWERON =>
             lcd_e <= '0';
             if wait_cnt = C_15MS then
-              wait_cnt <= 0;
-              state <= S_INIT0;
+              wait_cnt <= 0; state <= S_INIT0;
             else
               wait_cnt <= wait_cnt + 1;
             end if;
 
-          -- Init sequence: write 0x3 three times, then 0x2
+          -- Three writes of 0x3, then 0x2 (raw nibbles, no lower nibble)
           when S_INIT0 =>
-            lcd_db <= "0011"; lcd_rs <= '0';
-            if wait_cnt < C_ENABLE then
-              lcd_e <= '1'; wait_cnt <= wait_cnt + 1;
-            elsif wait_cnt < C_ENABLE + C_4_1MS then
-              lcd_e <= '0'; wait_cnt <= wait_cnt + 1;
-            else
+            lcd_db <= "0011"; lcd_rs <= '0'; lcd_e <= '0';
+            if wait_cnt = 0 then
+              lcd_e <= '1';
+            elsif wait_cnt = C_ENABLE then
+              lcd_e <= '0';
+            elsif wait_cnt = C_ENABLE + C_4_1MS then
               wait_cnt <= 0; state <= S_INIT1;
+            end if;
+            if wait_cnt < C_ENABLE + C_4_1MS then
+              wait_cnt <= wait_cnt + 1;
             end if;
 
           when S_INIT1 =>
-            lcd_db <= "0011"; lcd_rs <= '0';
-            if wait_cnt < C_ENABLE then
-              lcd_e <= '1'; wait_cnt <= wait_cnt + 1;
-            elsif wait_cnt < C_ENABLE + C_100US then
-              lcd_e <= '0'; wait_cnt <= wait_cnt + 1;
-            else
+            lcd_db <= "0011"; lcd_rs <= '0'; lcd_e <= '0';
+            if wait_cnt = 0 then
+              lcd_e <= '1';
+            elsif wait_cnt = C_ENABLE then
+              lcd_e <= '0';
+            elsif wait_cnt = C_ENABLE + C_100US then
               wait_cnt <= 0; state <= S_INIT2;
+            end if;
+            if wait_cnt < C_ENABLE + C_100US then
+              wait_cnt <= wait_cnt + 1;
             end if;
 
           when S_INIT2 =>
-            lcd_db <= "0011"; lcd_rs <= '0';
-            if wait_cnt < C_ENABLE then
-              lcd_e <= '1'; wait_cnt <= wait_cnt + 1;
-            elsif wait_cnt < C_ENABLE + C_40US then
-              lcd_e <= '0'; wait_cnt <= wait_cnt + 1;
-            else
+            lcd_db <= "0011"; lcd_rs <= '0'; lcd_e <= '0';
+            if wait_cnt = 0 then
+              lcd_e <= '1';
+            elsif wait_cnt = C_ENABLE then
+              lcd_e <= '0';
+            elsif wait_cnt = C_ENABLE + C_40US then
               wait_cnt <= 0; state <= S_INIT3;
+            end if;
+            if wait_cnt < C_ENABLE + C_40US then
+              wait_cnt <= wait_cnt + 1;
             end if;
 
           when S_INIT3 =>
-            lcd_db <= "0010"; lcd_rs <= '0';
-            if wait_cnt < C_ENABLE then
-              lcd_e <= '1'; wait_cnt <= wait_cnt + 1;
-            elsif wait_cnt < C_ENABLE + C_40US then
-              lcd_e <= '0'; wait_cnt <= wait_cnt + 1;
-            else
-              wait_cnt <= 0;
-              cur_byte <= x"28"; is_data <= '0'; state <= S_FUNC_SET;
-            end if;
-
-          -- Function Set 0x28
-          when S_FUNC_SET =>
+            lcd_db <= "0010"; lcd_rs <= '0'; lcd_e <= '0';
             if wait_cnt = 0 then
-              state <= S_WRITE_SETUP;
+              lcd_e <= '1';
+            elsif wait_cnt = C_ENABLE then
+              lcd_e <= '0';
+            elsif wait_cnt = C_ENABLE + C_40US then
+              wait_cnt <= 0;
+              seq_idx <= 0;
+              state <= S_NIBBLE_HI;
             end if;
-            -- After write completes, go to entry mode
-            -- (handled by char_idx sequencing below)
+            if wait_cnt < C_ENABLE + C_40US then
+              wait_cnt <= wait_cnt + 1;
+            end if;
 
-          -- Entry Mode 0x06
-          when S_ENTRY_MODE =>
-            cur_byte <= x"06"; is_data <= '0';
-            state <= S_WRITE_SETUP;
-
-          -- Display On 0x0C
-          when S_DISP_ON =>
-            cur_byte <= x"0C"; is_data <= '0';
-            state <= S_WRITE_SETUP;
-
-          -- Clear Display
-          when S_CLEAR =>
-            cur_byte <= x"01"; is_data <= '0';
-            state <= S_WRITE_SETUP;
-
-          -- Idle: wait for pending update
+          -- Idle: wait for pending refresh
           when S_IDLE =>
             lcd_e <= '0';
             if pending = '1' then
-              pending  <= '0';
-              char_idx <= 0;
-              -- Set DD RAM address to 0x00
-              cur_byte <= x"80"; is_data <= '0';
-              state <= S_SET_ADDR;
+              pending <= '0';
+              seq_idx <= 4;  -- skip init commands, start at set addr
+              state <= S_NIBBLE_HI;
             end if;
 
-          when S_SET_ADDR =>
-            state <= S_WRITE_SETUP;
-
-          -- Write nibble sequence
-          when S_WRITE_SETUP =>
-            lcd_rs <= is_data;
-            lcd_db <= cur_byte(7 downto 4);
+          -- Write upper nibble setup
+          when S_NIBBLE_HI =>
+            lcd_rs <= seq_rs;
+            lcd_db <= seq_byte(7 downto 4);
             lcd_e  <= '0';
             wait_cnt <= 0;
-            state <= S_WRITE_UPPER;
+            state <= S_NIBBLE_HI_E;
 
-          when S_WRITE_UPPER =>
-            if wait_cnt < C_ENABLE then
-              lcd_e <= '1'; wait_cnt <= wait_cnt + 1;
-            else
-              lcd_e <= '0'; wait_cnt <= 0; state <= S_WRITE_GAP;
-            end if;
-
-          when S_WRITE_GAP =>
-            if wait_cnt < C_1US then
-              wait_cnt <= wait_cnt + 1;
-            else
-              lcd_db <= cur_byte(3 downto 0);
-              wait_cnt <= 0; state <= S_WRITE_LOWER;
-            end if;
-
-          when S_WRITE_LOWER =>
-            if wait_cnt < C_ENABLE then
-              lcd_e <= '1'; wait_cnt <= wait_cnt + 1;
-            else
-              lcd_e <= '0'; wait_cnt <= 0; state <= S_WRITE_WAIT;
-            end if;
-
-          when S_WRITE_WAIT =>
-            -- Wait 40 us (or 1.64 ms after clear)
-            if cur_byte = x"01" then
-              if wait_cnt < C_1_64MS then
-                wait_cnt <= wait_cnt + 1;
-              else
-                wait_cnt <= 0;
-                -- After init sequence
-                if char_idx = 0 and is_data = '0' then
-                  -- Advance through init commands
-                  if cur_byte = x"28" then
-                    cur_byte <= x"06"; state <= S_WRITE_SETUP;
-                  end if;
-                else
-                  state <= S_IDLE;
-                end if;
-              end if;
-            elsif wait_cnt < C_40US then
-              wait_cnt <= wait_cnt + 1;
-            else
+          -- Pulse E for upper nibble
+          when S_NIBBLE_HI_E =>
+            lcd_e <= '1';
+            if wait_cnt = C_ENABLE then
+              lcd_e <= '0';
               wait_cnt <= 0;
-              -- Determine next action
-              if is_data = '0' and char_idx = 0 then
-                -- Init sequence progression
-                if cur_byte = x"28" then
-                  cur_byte <= x"06"; state <= S_WRITE_SETUP;
-                elsif cur_byte = x"06" then
-                  cur_byte <= x"0C"; state <= S_WRITE_SETUP;
-                elsif cur_byte = x"0C" then
-                  cur_byte <= x"01"; state <= S_WRITE_SETUP;
-                elsif cur_byte = x"80" or cur_byte = x"C0" then
-                  -- Address set done, write chars
-                  is_data <= '1';
-                  byte_v := line_buf(255 - char_idx*8 downto 248 - char_idx*8);
-                  cur_byte <= byte_v;
-                  state <= S_WRITE_SETUP;
-                else
-                  state <= S_IDLE;
-                end if;
-              elsif is_data = '1' then
-                -- Writing characters
-                if char_idx = 15 then
-                  -- End of line 1, set address to line 2
-                  char_idx <= 16;
-                  cur_byte <= x"C0"; is_data <= '0';
-                  state <= S_WRITE_SETUP;
-                elsif char_idx = 31 then
-                  -- Done
-                  state <= S_IDLE;
-                else
-                  char_idx <= char_idx + 1;
-                  byte_v := line_buf(255 - (char_idx+1)*8 downto 248 - (char_idx+1)*8);
-                  cur_byte <= byte_v;
-                  state <= S_WRITE_SETUP;
-                end if;
+              state <= S_GAP;
+            else
+              wait_cnt <= wait_cnt + 1;
+            end if;
+
+          -- 1 us gap between nibbles
+          when S_GAP =>
+            if wait_cnt = C_1US then
+              wait_cnt <= 0;
+              state <= S_NIBBLE_LO;
+            else
+              wait_cnt <= wait_cnt + 1;
+            end if;
+
+          -- Write lower nibble setup
+          when S_NIBBLE_LO =>
+            lcd_db <= seq_byte(3 downto 0);
+            lcd_e  <= '0';
+            wait_cnt <= 0;
+            state <= S_NIBBLE_LO_E;
+
+          -- Pulse E for lower nibble
+          when S_NIBBLE_LO_E =>
+            lcd_e <= '1';
+            if wait_cnt = C_ENABLE then
+              lcd_e <= '0';
+              wait_cnt <= 0;
+              -- Set wait time based on command
+              if seq_idx = 3 then
+                wait_target <= C_1_64MS;  -- Clear display
               else
-                -- After line2 address set
-                is_data <= '1';
-                byte_v := line_buf(255 - char_idx*8 downto 248 - char_idx*8);
-                cur_byte <= byte_v;
-                state <= S_WRITE_SETUP;
+                wait_target <= C_40US;
               end if;
+              state <= S_WAIT;
+            else
+              wait_cnt <= wait_cnt + 1;
+            end if;
+
+          -- Wait for command execution
+          when S_WAIT =>
+            if wait_cnt = wait_target then
+              wait_cnt <= 0;
+              state <= S_NEXT;
+            else
+              wait_cnt <= wait_cnt + 1;
+            end if;
+
+          -- Advance to next in sequence
+          when S_NEXT =>
+            if seq_idx = 37 then
+              -- Done with full refresh
+              state <= S_IDLE;
+            elsif seq_idx = 3 then
+              -- After clear, continue init → set addr line1
+              seq_idx <= 4;
+              state <= S_NIBBLE_HI;
+            else
+              seq_idx <= seq_idx + 1;
+              state <= S_NIBBLE_HI;
             end if;
 
         end case;
