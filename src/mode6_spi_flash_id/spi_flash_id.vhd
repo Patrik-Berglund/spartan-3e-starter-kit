@@ -16,6 +16,8 @@ entity spi_flash_id is
     dac_cs    : out std_logic;
     amp_cs    : out std_logic;
     ad_conv   : out std_logic;
+    -- Debug
+    led       : out std_logic_vector(7 downto 0);
     lcd_line2 : out std_logic_vector(127 downto 0)
   );
 end entity spi_flash_id;
@@ -23,7 +25,7 @@ end entity spi_flash_id;
 architecture rtl of spi_flash_id is
   type state_t is (S_IDLE, S_WAKEUP, S_WAKE_CLOCK, S_WAKE_DONE, S_PAUSE, S_START, S_CLOCK, S_DONE);
   signal state    : state_t := S_IDLE;
-  signal bit_cnt  : integer range 0 to 31 := 0;
+  signal bit_cnt  : integer range 0 to 2000 := 0;
   signal clk_div  : unsigned(3 downto 0) := (others => '0');
   signal shift_tx : std_logic_vector(31 downto 0) := (others => '0');
   signal shift_rx : std_logic_vector(23 downto 0) := (others => '0');
@@ -161,6 +163,15 @@ begin
 
   spi_sck  <= sck_int;
   spi_mosi <= shift_tx(31);
+
+  -- Debug: show raw MISO and state on LEDs when in this mode
+  -- LED0 = spi_miso, LED1 = spi_ss_b (should go low during transfer), LED7 = read_ok
+  led(0) <= spi_miso;
+  led(1) <= '0';  -- CS is low during transfer
+  led(2) <= sck_int;
+  led(3) <= shift_tx(31);
+  led(7) <= read_ok;
+  led(6 downto 4) <= (others => '0');
 
   -- LCD: "ID: XX XX XX    "
   lcd_line2 <=
