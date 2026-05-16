@@ -1,10 +1,20 @@
 # Board Explorer Demo
 
-Press the rotary encoder knob to cycle through 9 demo modes. Each mode exercises a different board peripheral. Rotate the knob to adjust parameters within the current mode.
-
-The 4 slide switches select the demo mode (0–8). The rotary encoder and 4 push buttons are used within each demo for control.
+The 4 slide switches (SW3:0) select the demo mode (0–8). The rotary encoder and 4 push buttons are used within each demo for control.
 
 The LCD shows the current mode name on line 1 and mode-specific status on line 2.
+
+| SW3:0 | Mode |
+|-------|------|
+| 0000 | 1: LED Chaser |
+| 0001 | 2: DAC Waveform |
+| 0010 | 3: ADC Voltmeter |
+| 0011 | 4: UART Echo |
+| 0100 | 5: PS/2 Keyboard |
+| 0101 | 6: SPI Flash ID |
+| 0110 | 7: DDR MemTest |
+| 0111 | 8: VGA Pattern |
+| 1000 | 9: Ethernet Ping |
 
 ## Modes
 
