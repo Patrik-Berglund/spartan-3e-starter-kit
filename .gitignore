@@ -39,3 +39,6 @@ _impactbatch.log
 
 # Xilinx license (do not commit)
 *.lic
+
+# Windows Zone.Identifier files
+*:Zone.Identifier
