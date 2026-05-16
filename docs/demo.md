@@ -2,6 +2,8 @@
 
 Press the rotary encoder knob to cycle through 9 demo modes. Each mode exercises a different board peripheral. Rotate the knob to adjust parameters within the current mode.
 
+The 4 slide switches select the demo mode (0–8). The rotary encoder and 4 push buttons are used within each demo for control.
+
 The LCD shows the current mode name on line 1 and mode-specific status on line 2.
 
 ## Modes
@@ -11,7 +13,9 @@ The LCD shows the current mode name on line 1 and mode-specific status on line 2
 Animated patterns on the 8 LEDs.
 
 - **Rotate** — adjust speed (0=slow, F=fast)
-- **SW(2:0)** — select pattern (0=bounce, 1=alternating, 2=rotate left, 3=rotate right, 4=fill, 5+=blink all)
+- **BTN_EAST** — next pattern
+- **BTN_WEST** — previous pattern
+- Patterns: 0=bounce, 1=alternating, 2=rotate left, 3=rotate right, 4=fill, 5=blink all
 
 ### 2: DAC Waveform
 
