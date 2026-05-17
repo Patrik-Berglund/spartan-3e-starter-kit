@@ -27,6 +27,20 @@ Flow: xst → ngdbuild → map → par → bitgen
 sudo xc3sprog -c xpc -p 0 build/top.bit
 ```
 
+### USB cable setup (WSL)
+
+The cable often needs firmware loaded after power-cycle. Full sequence:
+
+1. `lsusb | grep Xilinx` — if `03fd:000d`, firmware not loaded
+2. `sudo fxload -t fx2 -I /opt/Xilinx/14.7/ISE_DS/ISE/bin/lin64/xusbdfwu.hex -D /dev/bus/usb/<bus>/<dev>`
+3. Cable re-enumerates as `03fd:0008` — must re-bind and re-attach from Admin PowerShell:
+   ```
+   usbipd bind --busid <BUSID>
+   usbipd attach --wsl --busid <BUSID>
+   ```
+4. Verify: `lsusb | grep Xilinx` should show `03fd:0008`
+5. Then program with `xc3sprog`
+
 ## Conventions
 
 - All source in `src/`, constraints in `constraints/`, build scripts in `build/`

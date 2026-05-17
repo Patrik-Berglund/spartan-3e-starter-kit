@@ -152,7 +152,19 @@ If the cable shows `03fd:000d` (firmware not loaded) instead of `03fd:0008`, loa
 sudo fxload -t fx2 -I /opt/Xilinx/14.7/ISE_DS/ISE/bin/lin64/xusbdfwu.hex -D /dev/bus/usb/<bus>/<dev>
 ```
 
-The cable re-enumerates after firmware load — re-attach from PowerShell before continuing.
+The cable re-enumerates after firmware load with a new device ID (`03fd:0008`). You must re-bind and re-attach from PowerShell:
+
+```powershell
+usbipd list                          # confirm it now shows 03fd:0008
+usbipd bind --busid <BUSID>
+usbipd attach --wsl --busid <BUSID>
+```
+
+Verify in WSL before programming:
+
+```bash
+lsusb | grep Xilinx   # should show 03fd:0008
+```
 
 ## Program the board
 

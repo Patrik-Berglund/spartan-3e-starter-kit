@@ -70,7 +70,7 @@ Initializes the DDR SDRAM and runs a basic connectivity test.
 - **LCD** — shows "PASS Init OK" or "Testing..."
 - **LEDs** — all on = pass, ends lit = fail
 
-### 8: VGA Test Pattern ⚠️ Untested
+### 8: VGA Test Pattern ✓
 
 Outputs a 640×480 @ 60 Hz test pattern on the VGA port (DB15).
 
